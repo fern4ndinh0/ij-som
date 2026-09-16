@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IJ Som | Som, painéis de LED e estrutura para eventos</title>
+<meta name="description" content="Estrutura completa para eventos: sonorização com mesa digital, painéis de LED, iluminação, palco e equipe técnica. Casamentos, 15 anos, corporativos, workshops e shows.">
+<meta name="theme-color" content="#060A0F">
+<meta property="og:title" content="IJ Som | Estrutura completa para eventos">
+<meta property="og:description" content="Som, painéis de LED, iluminação e palco com equipamento de ponta e equipe técnica do início ao fim.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 126'%3E%3Crect width='150' height='126' rx='28' fill='%232C4A64'/%3E%3Cg fill='white'%3E%3Cpath d='M14 26h28v52c0 12 9 19 23 19h4c14 0 23-7 23-19V26h28v54c0 27-21 44-51 44h-4c-30 0-51-17-51-44z'/%3E%3Crect x='60' y='0' width='26' height='20' rx='3'/%3E%3Crect x='60' y='30' width='26' height='44' rx='3'/%3E%3C/g%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ink:   { 900:'#060A0F', 800:'#0A1017', 700:'#101923', 600:'#16222E' },
+        steel: { 900:'#1B2E3F', 700:'#2C4A64', 500:'#3E6A8C' },
+        azul:  { 300:'#7FDCFF', 400:'#3CC1F5', 500:'#12A5E3', 600:'#0A80B8', 700:'#075E88' }
+      },
+      fontFamily: {
+        sans: ['Inter','system-ui','Segoe UI','Arial','sans-serif'],
+        display: ['Poppins','Inter','system-ui','sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root{ color-scheme: dark; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ background:#060A0F; overflow-x:hidden; }
+  ::selection{ background:#12A5E3; color:#04202e; }
+
+  /* âncoras não param atrás da barra fixa */
+  section[id], [id="topo"]{ scroll-margin-top:90px; }
+
+  /* trilhos de luz do fundo, inspirados na arte da marca */
+  .beam{
+    position:absolute; top:-30%; height:170%; width:2px;
+    background:linear-gradient(to bottom, transparent, rgba(60,193,245,.75), transparent);
+    filter:blur(.4px); opacity:.5; transform:rotate(18deg); transform-origin:top center;
+    animation: sweep 9s ease-in-out infinite;
+  }
+  .beam.wide{ width:120px; background:linear-gradient(to bottom, transparent, rgba(18,165,227,.16), transparent); filter:blur(26px); opacity:.85; }
+  @keyframes sweep{
+    0%,100%{ transform:rotate(18deg) translateX(0); opacity:.30 }
+    50%    { transform:rotate(15deg) translateX(30px); opacity:.65 }
+  }
+
+  .grain{
+    background-image:radial-gradient(rgba(255,255,255,.055) 1px, transparent 1px);
+    background-size:3px 3px;
+  }
+
+  /* revelação no scroll */
+  .reveal{ opacity:0; transform:translateY(26px); }
+  .reveal.is-in{ opacity:1; transform:none; transition:opacity .75s cubic-bezier(.16,1,.3,1), transform .75s cubic-bezier(.16,1,.3,1); transition-delay:var(--d,0ms); }
+
+  /* equalizador do hero */
+  .eq span{ display:block; flex:1 1 0; border-radius:2px; height:100%;
+    background:linear-gradient(to top,#075E88,#3CC1F5); transform-origin:bottom;
+    animation:bounce 1.25s ease-in-out infinite; }
+  @keyframes bounce{ 0%,100%{ transform:scaleY(.12) } 50%{ transform:scaleY(1) } }
+
+  .card-glow{ position:relative; }
+  .card-glow::after{
+    content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%), rgba(60,193,245,.16), transparent 62%);
+    opacity:0; transition:opacity .35s;
+  }
+  .card-glow:hover::after{ opacity:1 }
+
+  .link-underline{ background-image:linear-gradient(#3CC1F5,#3CC1F5); background-size:0% 1.5px; background-position:0 100%;
+    background-repeat:no-repeat; transition:background-size .35s cubic-bezier(.16,1,.3,1); }
+  .link-underline:hover{ background-size:100% 1.5px }
+
+  /* chips do formulário */
+  .chip input{ position:absolute; opacity:0; width:0; height:0 }
+  .chip span{ display:flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none;
+    min-height:46px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03);
+    padding:.65rem .95rem; border-radius:.75rem; font-size:.875rem; line-height:1.3; color:#cbd5e1; transition:all .2s;
+    -webkit-tap-highlight-color:transparent; }
+  .chip:hover span{ border-color:rgba(60,193,245,.45); color:#e2e8f0 }
+  .chip input:checked + span{ border-color:#12A5E3; background:rgba(18,165,227,.14); color:#fff; box-shadow:0 0 0 1px rgba(18,165,227,.35) }
+  .chip input:focus-visible + span{ outline:2px solid #3CC1F5; outline-offset:2px }
+
+  .field{ width:100%; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.12);
+    border-radius:.75rem; padding:.8rem .95rem; color:#f1f5f9; font-size:.95rem; transition:border-color .2s, box-shadow .2s; }
+  .field::placeholder{ color:#64748b }
+  .field:focus{ outline:none; border-color:#12A5E3; box-shadow:0 0 0 3px rgba(18,165,227,.18) }
+  .field.err{ border-color:#f87171; box-shadow:0 0 0 3px rgba(248,113,113,.15) }
+  select.field{ appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M3 5l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 1rem center; padding-right:2.5rem; }
+  select.field option{ background:#0A1017 }
+  input[type=date].field::-webkit-calendar-picker-indicator,
+  input[type=time].field::-webkit-calendar-picker-indicator{ filter:invert(.7) }
+
+  .marquee-track{ animation:slide 34s linear infinite }
+  @keyframes slide{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* --------- ajustes de celular --------- */
+  /* abaixo de 16px o iOS dá zoom sozinho ao focar o campo */
+  @media (max-width: 640px){
+    .field{ font-size:16px; padding:.85rem .95rem; }
+    .field::placeholder{ font-size:.9rem }
+  }
+  /* em tela de toque o hover fica "grudado" depois do tap */
+  @media (hover: none){
+    .card-glow:hover{ transform:none !important }
+    .card-glow::after{ display:none }
+    img.hover\:scale-105:hover{ transform:none }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important }
+    .reveal{ opacity:1; transform:none }
+  }
+</style>
+</head>
+<body class="bg-ink-900 font-sans text-slate-300 antialiased">
+
+<!-- ====================== NAV ====================== -->
+<header id="nav" class="fixed inset-x-0 top-0 z-50 transition-all duration-300" style="padding-top:env(safe-area-inset-top,0px)">
+  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div id="navbar" class="mt-4 flex items-center justify-between rounded-2xl border border-white/5 bg-ink-800/60 px-4 py-3 backdrop-blur-xl transition-all duration-300 sm:px-5">
+      <a href="#topo" class="flex shrink-0 items-center" aria-label="IJ Som, ir para o início">
+        <img src="img/logo-ij.png" alt="IJ Som" width="500" height="200"
+             class="h-7 w-auto drop-shadow-[0_0_12px_rgba(60,193,245,.45)] sm:h-8">
+      </a>
+
+      <nav class="hidden items-center gap-7 text-sm text-slate-400 lg:flex">
+        <a href="#eventos" class="link-underline hover:text-white">Eventos</a>
+        <a href="#estrutura" class="link-underline hover:text-white">Estrutura</a>
+        <a href="#processo" class="link-underline hover:text-white">Como funciona</a>
+        <a href="#diferenciais" class="link-underline hover:text-white">Diferenciais</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a href="#orcamento" class="hidden rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-azul-500/60 hover:text-white sm:block">Orçamento</a>
+        <a href="https://wa.me/5531999777676?text=Ol%C3%A1%2C%20IJ%20Som!%20Vim%20pelo%20site%20e%20gostaria%20de%20falar%20sobre%20um%20evento." target="_blank" rel="noopener"
+           class="flex items-center gap-2 rounded-xl bg-azul-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-azul-500/25 transition hover:bg-azul-400">
+          <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
+          <span class="hidden sm:inline">WhatsApp</span>
+        </a>
+        <button id="burger" class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-slate-300 lg:hidden" aria-label="Abrir menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobileMenu" class="mt-2 hidden overflow-hidden rounded-2xl border border-white/5 bg-ink-800/95 backdrop-blur-xl lg:hidden">
+      <a href="#eventos" class="block border-b border-white/5 px-5 py-4 text-slate-300">Eventos</a>
+      <a href="#estrutura" class="block border-b border-white/5 px-5 py-4 text-slate-300">Estrutura</a>
+      <a href="#processo" class="block border-b border-white/5 px-5 py-4 text-slate-300">Como funciona</a>
+      <a href="#diferenciais" class="block border-b border-white/5 px-5 py-4 text-slate-300">Diferenciais</a>
+      <a href="#orcamento" class="block px-5 py-4 font-semibold text-azul-400">Pedir orçamento</a>
+    </div>
+  </div>
+</header>
+
+<!-- ====================== HERO ====================== -->
+<section id="topo" class="relative isolate overflow-hidden pb-14 pt-28 sm:pb-24 sm:pt-44">
+  <div class="absolute inset-0 -z-10">
+    <div class="absolute inset-0 bg-[radial-gradient(90%_60%_at_50%_0%,#0E2233_0%,#060A0F_62%)]"></div>
+    <div class="beam wide" style="left:8%;  animation-delay:-1s"></div>
+    <div class="beam" style="left:22%; animation-delay:-3s"></div>
+    <div class="beam wide" style="left:46%; animation-delay:-5s"></div>
+    <div class="beam" style="left:63%; animation-delay:-2s"></div>
+    <div class="beam wide" style="left:82%; animation-delay:-6s"></div>
+    <div class="absolute inset-0 grain opacity-40"></div>
+    <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink-900 to-transparent"></div>
+  </div>
+
+  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="reveal inline-flex items-center gap-2 rounded-full border border-azul-500/30 bg-azul-500/10 px-4 py-1.5 text-xs font-medium text-azul-300">
+      <span class="relative flex h-2 w-2">
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-azul-400 opacity-75"></span>
+        <span class="relative inline-flex h-2 w-2 rounded-full bg-azul-400"></span>
+      </span>
+      Agenda aberta para a próxima temporada
+    </div>
+
+    <h1 class="reveal mt-7 max-w-4xl font-display text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl lg:text-7xl" style="--d:80ms">
+      A estrutura que faz<br class="hidden sm:block"> o seu evento
+      <span class="relative whitespace-nowrap">
+        <span class="relative z-10 bg-gradient-to-r from-azul-300 via-azul-400 to-azul-600 bg-clip-text text-transparent">acontecer.</span>
+        <svg viewBox="0 0 300 12" class="absolute -bottom-2 left-0 w-full text-azul-500/60" fill="none" aria-hidden="true">
+          <path d="M2 8c60-6 130-7 296-3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </h1>
+
+    <p class="reveal mt-8 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg" style="--d:160ms">
+      Sonorização com mesa digital, painéis de LED, iluminação e palco montados por uma equipe que fica ao seu lado do primeiro teste até o último acorde. Casamentos, 15 anos, eventos corporativos, workshops e shows.
+    </p>
+
+    <div class="reveal mt-10 flex flex-col gap-3 sm:flex-row sm:items-center" style="--d:240ms">
+      <a href="#orcamento" class="group inline-flex items-center justify-center gap-2 rounded-xl bg-azul-500 px-7 py-4 font-semibold text-white shadow-xl shadow-azul-500/25 transition hover:bg-azul-400">
+        Montar meu orçamento
+        <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform group-hover:translate-x-1" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="https://wa.me/5531999777676?text=Ol%C3%A1%2C%20IJ%20Som!%20Vim%20pelo%20site%20e%20gostaria%20de%20falar%20sobre%20um%20evento." target="_blank" rel="noopener"
+         class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-7 py-4 font-medium text-slate-200 backdrop-blur transition hover:border-azul-500/50 hover:text-white">
+        Falar agora no WhatsApp
+      </a>
+    </div>
+
+    <!-- Selos qualitativos. Troque por números reais (eventos realizados, anos de estrada) quando tiver os dados. -->
+    <div class="reveal mt-12 grid grid-cols-2 sm:mt-16 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4" style="--d:320ms">
+      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Mesa digital</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Console de linha, com cena salva para cada evento</p></div>
+      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Equipe própria</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Operadores de som, luz e vídeo presentes no local</p></div>
+      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Montagem inclusa</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Chegada com antecedência e tudo testado antes da hora</p></div>
+      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">BH e região</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Atendimento em Belo Horizonte e interior de Minas</p></div>
+    </div>
+  </div>
+
+  <div id="eq" class="eq pointer-events-none mx-auto mt-16 flex h-16 max-w-6xl items-end gap-[3px] px-5 opacity-50 sm:px-8" aria-hidden="true"></div>
+</section>
+
+<!-- ====================== MARQUEE ====================== -->
+<div class="relative overflow-hidden border-y border-white/5 bg-ink-800/40 py-4">
+  <div class="marquee-track flex w-max gap-10 whitespace-nowrap text-sm font-medium uppercase tracking-[.2em] text-slate-600">
+    <span class="flex gap-10">
+      <span>Sonorização</span><span class="text-azul-500">/</span><span>Painéis de LED</span><span class="text-azul-500">/</span><span>Iluminação cênica</span><span class="text-azul-500">/</span><span>Palco e estrutura</span><span class="text-azul-500">/</span><span>Transmissão</span><span class="text-azul-500">/</span><span>Equipe técnica</span><span class="text-azul-500">/</span>
+    </span>
+    <span class="flex gap-10" aria-hidden="true">
+      <span>Sonorização</span><span class="text-azul-500">/</span><span>Painéis de LED</span><span class="text-azul-500">/</span><span>Iluminação cênica</span><span class="text-azul-500">/</span><span>Palco e estrutura</span><span class="text-azul-500">/</span><span>Transmissão</span><span class="text-azul-500">/</span><span>Equipe técnica</span><span class="text-azul-500">/</span>
+    </span>
+  </div>
+</div>
+
+<!-- ====================== EVENTOS ====================== -->
+<section id="eventos" class="relative py-16 sm:py-28">
+  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="reveal max-w-2xl">
+      <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">O que a gente atende</p>
+      <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Cada evento pede uma montagem diferente</h2>
+      <p class="mt-5 text-slate-400">Um casamento de 200 pessoas em salão fechado não precisa do mesmo PA de um show ao ar livre. A gente dimensiona a estrutura pelo seu evento, não por um pacote pronto de prateleira.</p>
+    </div>
+
+    <div class="mt-10 grid gap-4 sm:mt-14 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M12 21s-7-4.5-7-9.5A3.5 3.5 0 0 1 12 9a3.5 3.5 0 0 1 7 2.5C19 16.5 12 21 12 21Z"/></svg>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-semibold text-white">Casamento</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Cerimônia, recepção e pista com sonorização separada por ambiente. Microfone sem fio para celebrante e votos, iluminação da mesa e do bolo, painel de LED para o retrospectivo.</p>
+      </article>
+
+      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:80ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="m12 3 2.4 5.5L20 9.3l-4 4 1 5.7-5-2.8-5 2.8 1-5.7-4-4 5.6-.8Z"/></svg>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-semibold text-white">Festa de 15 anos</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Entrada, valsa e balada no mesmo lugar, com trocas de cena bem marcadas. Luz que acompanha a coreografia, LED para os vídeos e som pesado o suficiente para a pista.</p>
+      </article>
+
+      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:160ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M3 21V9l9-6 9 6v12M9 21v-6h6v6"/></svg>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-semibold text-white">Evento corporativo</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Convenção, lançamento, premiação ou confraternização. Painel de LED no palco, microfones para mesa e plateia, operação discreta e cronograma seguido à risca.</p>
+      </article>
+
+      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:40ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M4 5h16v11H4zM8 21h8M12 16v5"/></svg>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-semibold text-white">Workshop e treinamento</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Inteligibilidade em primeiro lugar. Headset para quem apresenta, projeção ou LED com slides legíveis do fundo da sala e captação limpa quando o conteúdo vai ser gravado.</p>
+      </article>
+
+      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:120ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm11-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-semibold text-white">Show e festival</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">PA dimensionado para o público, monitoração de palco, backline organizado e passagem de som no horário combinado com a banda. Rider recebido com antecedência.</p>
+      </article>
+
+      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:200ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5zM5 11v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>
+        </div>
+        <h3 class="mt-5 font-display text-xl font-semibold text-white">Formatura e confraternização</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Colação, jantar e festa com equipes e equipamentos que aguentam a noite inteira. Nomes na tela, trilha sincronizada e transição entre os blocos sem silêncio constrangedor.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ESTRUTURA ====================== -->
+<section id="estrutura" class="relative overflow-hidden border-y border-white/5 bg-ink-800/30 py-16 sm:py-28">
+  <div class="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-azul-600/10 blur-3xl"></div>
+  <div class="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-steel-700/20 blur-3xl"></div>
+
+  <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="reveal flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Estrutura e equipamento</p>
+        <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Tudo que sobe no evento sai da nossa casa</h2>
+      </div>
+      <p class="max-w-md text-slate-400">Equipamento próprio, revisado antes de cada saída. Você fecha com uma empresa só e não precisa coordenar cinco fornecedores no dia.</p>
+    </div>
+
+    <div class="mt-10 grid gap-10 sm:mt-14 lg:grid-cols-2 lg:gap-14">
+
+      <!-- Fotos reais de montagem. Para trocar ou acrescentar, basta apontar para outro arquivo em img/ -->
+      <div class="reveal grid grid-cols-2 gap-3 sm:gap-4">
+        <figure class="col-span-2 overflow-hidden rounded-2xl border border-white/10">
+          <img src="img/palco.jpg" alt="Palco montado com painel de LED, moving heads e caixas de retorno"
+               loading="lazy" decoding="async"
+               class="aspect-[16/11] w-full object-cover object-center transition duration-700 hover:scale-105 sm:aspect-[16/10]">
+        </figure>
+        <figure class="overflow-hidden rounded-2xl border border-white/10">
+          <img src="img/mesa.jpg" alt="Técnico da IJ Som operando a mesa durante o evento"
+               loading="lazy" decoding="async"
+               class="aspect-[3/4] w-full object-cover object-center transition duration-700 hover:scale-105">
+        </figure>
+        <figure class="overflow-hidden rounded-2xl border border-white/10">
+          <img src="img/festival.jpg" alt="Equipe instalando microfone headset em apresentadora de evento cultural"
+               loading="lazy" decoding="async"
+               class="aspect-[3/4] w-full object-cover object-center transition duration-700 hover:scale-105">
+        </figure>
+      </div>
+
+      <dl class="reveal divide-y divide-white/10 border-y border-white/10" style="--d:120ms">
+        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
+          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">01</span>
+          <div>
+            <dt class="font-display text-base font-semibold text-white">Sonorização</dt>
+            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Mesa digital com cena salva por evento, line array ou caixas ativas conforme o público, microfones sem fio, headset e lapela, retornos e monitoração in ear.</dd>
+          </div>
+        </div>
+        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
+          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">02</span>
+          <div>
+            <dt class="font-display text-base font-semibold text-white">Painéis de LED e vídeo</dt>
+            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Painéis de alta resolução em vários formatos, processamento de imagem ao vivo, exibição de vídeos e marcas, telão para cerimônia e transmissão.</dd>
+          </div>
+        </div>
+        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
+          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">03</span>
+          <div>
+            <dt class="font-display text-base font-semibold text-white">Iluminação cênica</dt>
+            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Moving heads, par LED e efeitos, com desenho de luz pensado para cada momento da festa, além da ambientação de mesas e da arquitetura do espaço.</dd>
+          </div>
+        </div>
+        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
+          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">04</span>
+          <div>
+            <dt class="font-display text-base font-semibold text-white">Palco e estrutura</dt>
+            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Praticáveis e palcos de diversos tamanhos, box truss, ground support e torres, com montagem dimensionada para o local e acabamento na frente do público.</dd>
+          </div>
+        </div>
+        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
+          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">05</span>
+          <div>
+            <dt class="font-display text-base font-semibold text-white">Energia e infraestrutura</dt>
+            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Distribuição e quadros de energia, cabeamento passado e protegido, conferência de carga antes da montagem e gerador quando o local pede.</dd>
+          </div>
+        </div>
+        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
+          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">06</span>
+          <div>
+            <dt class="font-display text-base font-semibold text-white">Equipe técnica</dt>
+            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Operadores de som, luz e vídeo, montagem e desmontagem completas e técnico de plantão do início ao fim do evento.</dd>
+          </div>
+        </div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== PROCESSO ====================== -->
+<section id="processo" class="py-16 sm:py-28">
+  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="reveal max-w-2xl">
+      <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Como funciona</p>
+      <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Do primeiro contato até a desmontagem</h2>
+    </div>
+
+    <ol class="relative mt-10 grid gap-8 sm:mt-14 sm:grid-cols-2 lg:grid-cols-4">
+      <li class="reveal relative">
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-azul-500/40 bg-azul-500/10 font-display text-sm font-semibold text-azul-300">01</span>
+          <div class="h-px flex-1 bg-gradient-to-r from-azul-500/40 to-transparent"></div>
+        </div>
+        <h3 class="mt-5 font-display text-lg font-semibold text-white">Você conta o evento</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Pelo formulário aqui do site ou direto no WhatsApp. Quanto mais detalhe sobre local, público e horário, mais rápido volta uma proposta que faz sentido.</p>
+      </li>
+      <li class="reveal relative" style="--d:100ms">
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-azul-500/40 bg-azul-500/10 font-display text-sm font-semibold text-azul-300">02</span>
+          <div class="h-px flex-1 bg-gradient-to-r from-azul-500/40 to-transparent"></div>
+        </div>
+        <h3 class="mt-5 font-display text-lg font-semibold text-white">Proposta sob medida</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Montamos o orçamento com o que o seu evento realmente precisa. Se um item não vai ser usado, a gente tira e explica o porquê.</p>
+      </li>
+      <li class="reveal relative" style="--d:200ms">
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-azul-500/40 bg-azul-500/10 font-display text-sm font-semibold text-azul-300">03</span>
+          <div class="h-px flex-1 bg-gradient-to-r from-azul-500/40 to-transparent"></div>
+        </div>
+        <h3 class="mt-5 font-display text-lg font-semibold text-white">Visita e planejamento</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Quando o local pede, vamos até ele conferir energia, acesso, pé direito e posicionamento. Alinhamos o cronograma com você e com os outros fornecedores.</p>
+      </li>
+      <li class="reveal relative" style="--d:300ms">
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-azul-500/40 bg-azul-500/10 font-display text-sm font-semibold text-azul-300">04</span>
+        </div>
+        <h3 class="mt-5 font-display text-lg font-semibold text-white">Montagem e operação</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-400">Chegamos cedo, testamos tudo antes de abrir as portas e ficamos com a equipe no local do começo ao fim. A desmontagem também é nossa.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ====================== DIFERENCIAIS ====================== -->
+<section id="diferenciais" class="relative overflow-hidden border-y border-white/5 bg-ink-800/30 py-16 sm:py-28">
+  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+      <div class="reveal">
+        <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Por que a IJ Som</p>
+        <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">O evento é único. A operação não pode ser improviso.</h2>
+        <p class="mt-6 leading-relaxed text-slate-400">Festa boa é aquela em que ninguém percebe o técnico trabalhando. Para chegar nesse ponto tem equipamento revisado, gente experiente na mesa e um plano para quando algo sai do previsto.</p>
+        <a href="#orcamento" class="group mt-9 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 font-semibold text-ink-900 transition hover:bg-azul-300">
+          Quero um orçamento
+          <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform group-hover:translate-x-1" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <ul class="reveal divide-y divide-white/10 border-y border-white/10">
+        <li class="flex gap-4 py-5">
+          <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Equipamento de linha.</strong> Consoles digitais, caixas e painéis de marcas reconhecidas, com manutenção em dia e conferência antes de cada carregamento.</p>
+        </li>
+        <li class="flex gap-4 py-5">
+          <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Reserva do que é crítico.</strong> Microfone, cabo e fonte reserva viajam junto. Se algo falhar no meio da festa, a troca acontece em segundos.</p>
+        </li>
+        <li class="flex gap-4 py-5">
+          <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Passagem de som de verdade.</strong> Nada de ajustar volume com o salão cheio. A montagem termina antes, com tempo para testar cada microfone e cada entrada.</p>
+        </li>
+        <li class="flex gap-4 py-5">
+          <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Atendimento direto.</strong> Você fala com quem vai operar o seu evento, sem intermediário e sem atendimento genérico por robô.</p>
+        </li>
+        <li class="flex gap-4 py-5">
+          <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Cabeamento organizado.</strong> Cabo passado, protegido e fora do caminho dos convidados. A área técnica fica limpa nas fotos e segura na circulação.</p>
+        </li>
+        <li class="flex gap-4 py-5">
+          <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Conversa com os fornecedores.</strong> Alinhamos cronograma com cerimonial, buffet, fotógrafo e banda para que ninguém atropele ninguém no dia.</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== INSTAGRAM ====================== -->
+<section class="py-16 sm:py-24">
+  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="reveal card-glow relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-steel-700/40 via-ink-800 to-ink-900 p-7 sm:p-14">
+      <div class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-azul-500/15 blur-3xl"></div>
+      <div class="relative flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-xl">
+          <h2 class="font-display text-2xl font-semibold leading-tight text-white sm:text-4xl">Veja as montagens no Instagram</h2>
+          <p class="mt-4 leading-relaxed text-slate-400">Bastidores, palcos prontos e festas rolando. É o jeito mais rápido de conferir o padrão do que entregamos antes de fechar.</p>
+        </div>
+        <a href="https://www.instagram.com/ijsomeventos?stkn=YmVwYm1jb2ZreTBt" target="_blank" rel="noopener"
+           class="group inline-flex shrink-0 items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-6 py-4 font-semibold text-white backdrop-blur transition hover:border-azul-400 hover:bg-white/10">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2 0 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-1.8-.2-2.2-.4a3.8 3.8 0 0 1-1.4-.9 3.8 3.8 0 0 1-.9-1.4c-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c0-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1m0 3.3a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13m0 10.7a4.2 4.2 0 1 1 0-8.4 4.2 4.2 0 0 1 0 8.4m6.8-10.9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg>
+          @ijsomeventos
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== FORMULÁRIO ====================== -->
+<section id="orcamento" class="relative overflow-hidden border-t border-white/5 py-16 sm:py-28">
+  <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(80%_50%_at_50%_100%,#0E2233_0%,#060A0F_60%)]"></div>
+
+  <div class="mx-auto max-w-4xl px-5 sm:px-8">
+    <div class="reveal text-center">
+      <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Orçamento</p>
+      <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Conte sobre o seu evento</h2>
+      <p class="mx-auto mt-5 max-w-xl text-slate-400">Preencha os campos abaixo e o resumo é enviado direto para o nosso WhatsApp, já organizado. Leva menos de dois minutos e adianta boa parte da conversa.</p>
+    </div>
+
+    <form id="briefing" novalidate class="reveal mt-10 space-y-6 sm:mt-14 sm:space-y-10" style="--d:100ms">
+
+      <!-- Bloco 1 -->
+      <fieldset class="rounded-3xl border border-white/8 bg-ink-800/50 p-6 backdrop-blur sm:p-9">
+        <legend class="flex items-center gap-3 px-2">
+          <span class="grid h-7 w-7 place-items-center rounded-lg bg-azul-500/15 font-display text-xs font-semibold text-azul-300">1</span>
+          <span class="font-display text-base font-semibold text-white">Seus dados</span>
+        </legend>
+
+        <div class="mt-7 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="nome" class="mb-2 block text-sm font-medium text-slate-300">Nome completo <span class="text-azul-400">*</span></label>
+            <input id="nome" name="nome" type="text" class="field" placeholder="Como podemos te chamar" autocomplete="name">
+          </div>
+          <div>
+            <label for="telefone" class="mb-2 block text-sm font-medium text-slate-300">WhatsApp para retorno <span class="text-azul-400">*</span></label>
+            <input id="telefone" name="telefone" type="tel" inputmode="numeric" class="field" placeholder="(31) 99999-9999" autocomplete="tel">
+          </div>
+          <div class="sm:col-span-2">
+            <label for="email" class="mb-2 block text-sm font-medium text-slate-300">E-mail <span class="text-slate-600">(opcional)</span></label>
+            <input id="email" name="email" type="email" class="field" placeholder="seunome@email.com" autocomplete="email">
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Bloco 2 -->
+      <fieldset class="rounded-3xl border border-white/8 bg-ink-800/50 p-6 backdrop-blur sm:p-9">
+        <legend class="flex items-center gap-3 px-2">
+          <span class="grid h-7 w-7 place-items-center rounded-lg bg-azul-500/15 font-display text-xs font-semibold text-azul-300">2</span>
+          <span class="font-display text-base font-semibold text-white">Sobre o evento</span>
+        </legend>
+
+        <div class="mt-7">
+          <p class="mb-3 text-sm font-medium text-slate-300">Tipo de evento <span class="text-azul-400">*</span></p>
+          <div id="tipoEventoGroup" class="flex flex-wrap gap-2.5">
+            <label class="chip relative"><input type="radio" name="tipoEvento" value="Casamento"><span>Casamento</span></label>
+            <label class="chip relative"><input type="radio" name="tipoEvento" value="Festa de 15 anos"><span>Festa de 15 anos</span></label>
+            <label class="chip relative"><input type="radio" name="tipoEvento" value="Evento corporativo"><span>Evento corporativo</span></label>
+            <label class="chip relative"><input type="radio" name="tipoEvento" value="Workshop ou treinamento"><span>Workshop ou treinamento</span></label>
+            <label class="chip relative"><input type="radio" name="tipoEvento" value="Show musical"><span>Show musical</span></label>
+            <label class="chip relative"><input type="radio" name="tipoEvento" value="Formatura ou confraternização"><span>Formatura ou confraternização</span></label>
+            <label class="chip relative"><input type="radio" name="tipoEvento" value="Aniversário"><span>Aniversário</span></label>
+            <label class="chip relative"><input type="radio" name="tipoEvento" value="Outro"><span>Outro</span></label>
+          </div>
+        </div>
+
+        <div class="mt-8 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="data" class="mb-2 block text-sm font-medium text-slate-300">Data do evento <span class="text-azul-400">*</span></label>
+            <input id="data" name="data" type="date" class="field">
+          </div>
+          <div>
+            <label for="publico" class="mb-2 block text-sm font-medium text-slate-300">Número de pessoas <span class="text-azul-400">*</span></label>
+            <select id="publico" name="publico" class="field">
+              <option value="">Selecione</option>
+              <option>Até 50 pessoas</option>
+              <option>De 50 a 150 pessoas</option>
+              <option>De 150 a 300 pessoas</option>
+              <option>De 300 a 600 pessoas</option>
+              <option>De 600 a 1.500 pessoas</option>
+              <option>Mais de 1.500 pessoas</option>
+              <option>Ainda não sei</option>
+            </select>
+          </div>
+          <div>
+            <label for="horaInicio" class="mb-2 block text-sm font-medium text-slate-300">Horário de início</label>
+            <input id="horaInicio" name="horaInicio" type="time" class="field">
+          </div>
+          <div>
+            <label for="duracao" class="mb-2 block text-sm font-medium text-slate-300">Duração prevista</label>
+            <select id="duracao" name="duracao" class="field">
+              <option value="">Selecione</option>
+              <option>Até 4 horas</option>
+              <option>De 4 a 6 horas</option>
+              <option>De 6 a 10 horas</option>
+              <option>Mais de 10 horas</option>
+              <option>Mais de um dia</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="local" class="mb-2 block text-sm font-medium text-slate-300">Local do evento <span class="text-azul-400">*</span></label>
+            <input id="local" name="local" type="text" class="field" placeholder="Nome do espaço, bairro e cidade">
+          </div>
+          <div class="sm:col-span-2">
+            <p class="mb-3 text-sm font-medium text-slate-300">Ambiente</p>
+            <div class="flex flex-wrap gap-2.5">
+              <label class="chip relative"><input type="radio" name="ambiente" value="Coberto"><span>Coberto</span></label>
+              <label class="chip relative"><input type="radio" name="ambiente" value="Ao ar livre"><span>Ao ar livre</span></label>
+              <label class="chip relative"><input type="radio" name="ambiente" value="Misto"><span>Misto</span></label>
+              <label class="chip relative"><input type="radio" name="ambiente" value="Ainda não definido"><span>Ainda não definido</span></label>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Bloco 3 -->
+      <fieldset class="rounded-3xl border border-white/8 bg-ink-800/50 p-6 backdrop-blur sm:p-9">
+        <legend class="flex items-center gap-3 px-2">
+          <span class="grid h-7 w-7 place-items-center rounded-lg bg-azul-500/15 font-display text-xs font-semibold text-azul-300">3</span>
+          <span class="font-display text-base font-semibold text-white">Estrutura desejada</span>
+        </legend>
+
+        <div class="mt-7">
+          <p class="mb-3 text-sm text-slate-400">Pode marcar quantas opções quiser. Se estiver em dúvida, marque a última e a gente ajuda a definir.</p>
+          <div id="estruturaGroup" class="flex flex-wrap gap-2.5">
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Estrutura completa"><span>Estrutura completa</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Somente som"><span>Somente som</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Painéis de LED"><span>Painéis de LED</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Iluminação"><span>Iluminação</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Palco ou praticável"><span>Palco ou praticável</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Telão ou projeção"><span>Telão ou projeção</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Microfones sem fio"><span>Microfones sem fio</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Gerador ou energia"><span>Gerador ou energia</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Equipe técnica no local"><span>Equipe técnica no local</span></label>
+            <label class="chip relative"><input type="checkbox" name="estrutura" value="Preciso de orientação"><span>Preciso de orientação</span></label>
+          </div>
+        </div>
+
+        <div class="mt-8 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label for="atracoes" class="mb-2 block text-sm font-medium text-slate-300">Atrações previstas</label>
+            <select id="atracoes" name="atracoes" class="field">
+              <option value="">Selecione</option>
+              <option>DJ</option>
+              <option>Banda ao vivo</option>
+              <option>DJ e banda</option>
+              <option>Apenas palestrante ou cerimônia</option>
+              <option>Ainda não definido</option>
+            </select>
+          </div>
+          <div>
+            <label for="investimento" class="mb-2 block text-sm font-medium text-slate-300">Faixa de investimento <span class="text-slate-600">(opcional)</span></label>
+            <select id="investimento" name="investimento" class="field">
+              <option value="">Prefiro não informar</option>
+              <option>Até R$ 3.000</option>
+              <option>De R$ 3.000 a R$ 8.000</option>
+              <option>De R$ 8.000 a R$ 15.000</option>
+              <option>De R$ 15.000 a R$ 30.000</option>
+              <option>Acima de R$ 30.000</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label for="observacoes" class="mb-2 block text-sm font-medium text-slate-300">Detalhes que ajudam</label>
+            <textarea id="observacoes" name="observacoes" rows="4" class="field resize-y" placeholder="Horário da cerimônia, se já tem outros fornecedores, necessidade de visita técnica, restrição de ruído do local, o que mais achar importante."></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Envio -->
+      <div class="rounded-3xl border border-azul-500/25 bg-azul-500/[.06] p-6 sm:p-9">
+        <p id="erroForm" class="mb-5 hidden items-center gap-2 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300"></p>
+
+        <button type="submit"
+          class="group flex w-full items-center justify-center gap-3 rounded-xl bg-azul-500 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-azul-500/25 transition hover:bg-azul-400 active:scale-[.99]">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
+          Enviar no WhatsApp
+          <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform group-hover:translate-x-1" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p class="mt-4 text-center text-xs text-slate-500">Ao enviar, o WhatsApp abre com a mensagem pronta. Nada é salvo neste site.</p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ====================== RODAPÉ ====================== -->
+<footer class="border-t border-white/5 bg-ink-800/40">
+  <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+    <div class="grid gap-10 md:grid-cols-[1.3fr_1fr_1fr]">
+      <div>
+        <img src="img/logo-ij.png" alt="IJ Som" width="500" height="200" class="h-10 w-auto">
+        <p class="mt-5 max-w-sm text-sm leading-relaxed text-slate-400">Som, painéis de LED, iluminação e estrutura para eventos em Belo Horizonte e região. Equipamento próprio e equipe técnica do briefing à desmontagem.</p>
+      </div>
+
+      <div>
+        <h3 class="font-display text-sm font-semibold uppercase tracking-widest text-slate-500">Navegação</h3>
+        <ul class="mt-5 space-y-3 text-sm text-slate-400">
+          <li><a href="#eventos" class="hover:text-azul-300">Eventos</a></li>
+          <li><a href="#estrutura" class="hover:text-azul-300">Estrutura</a></li>
+          <li><a href="#processo" class="hover:text-azul-300">Como funciona</a></li>
+          <li><a href="#diferenciais" class="hover:text-azul-300">Diferenciais</a></li>
+          <li><a href="#orcamento" class="hover:text-azul-300">Orçamento</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-display text-sm font-semibold uppercase tracking-widest text-slate-500">Contato</h3>
+        <ul class="mt-5 space-y-3 text-sm text-slate-400">
+          <li><a href="https://wa.me/5531999777676" target="_blank" rel="noopener" class="hover:text-azul-300">(31) 99977-7676</a></li>
+          <li><a href="https://www.instagram.com/ijsomeventos?stkn=YmVwYm1jb2ZreTBt" target="_blank" rel="noopener" class="hover:text-azul-300">@ijsomeventos</a></li>
+          <li>Belo Horizonte, Minas Gerais</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-14 flex flex-col gap-3 border-t border-white/5 pt-7 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+      <p>&copy; <span id="ano"></span> IJ Som. Todos os direitos reservados.</p>
+      <p>Estrutura completa para eventos corporativos e sociais.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Botão flutuante -->
+<a id="floatWpp" href="https://wa.me/5531999777676?text=Ol%C3%A1%2C%20IJ%20Som!%20Vim%20pelo%20site%20e%20gostaria%20de%20falar%20sobre%20um%20evento." target="_blank" rel="noopener"
+   class="fixed bottom-6 right-5 z-40 grid h-14 w-14 translate-y-24 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-black/40 transition-all duration-500 hover:scale-105"
+   style="bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" class="h-7 w-7 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
+</a>
+
+<script>
+(function () {
+  'use strict';
+
+  var WHATSAPP = '5531999777676';
+  var reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- ano no rodapé ---------- */
+  document.getElementById('ano').textContent = new Date().getFullYear();
+
+  /* ---------- equalizador do hero ---------- */
+  var eq = document.getElementById('eq');
+  function montarEq() {
+    if (!eq || reduz) return;
+    // uma barra a cada 14px, para não virar um borrão no celular
+    var qtd = Math.max(18, Math.min(72, Math.floor(eq.clientWidth / 14)));
+    if (eq.childElementCount === qtd) return;
+    var html = '';
+    for (var i = 0; i < qtd; i++) {
+      html += '<span style="animation-delay:' + (-(Math.random() * 1.25)).toFixed(2) +
+              's;animation-duration:' + (0.9 + Math.random() * 0.9).toFixed(2) + 's"></span>';
+    }
+    eq.innerHTML = html;
+  }
+  montarEq();
+
+  /* ---------- nav ---------- */
+  var navbar = document.getElementById('navbar');
+  var floatWpp = document.getElementById('floatWpp');
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('mobileMenu');
+  function onScroll() {
+    var y = window.scrollY;
+    navbar.classList.toggle('bg-ink-900/85', y > 30);
+    navbar.classList.toggle('border-white/10', y > 30);
+    navbar.classList.toggle('shadow-2xl', y > 30);
+    navbar.classList.toggle('shadow-black/40', y > 30);
+    floatWpp.classList.toggle('translate-y-24', y < 600);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* redimensionamento: refaz o equalizador e fecha o menu ao virar a tela */
+  var t;
+  window.addEventListener('resize', function () {
+    clearTimeout(t);
+    t = setTimeout(function () {
+      montarEq();
+      if (window.innerWidth >= 1024) {
+        menu.classList.add('hidden');
+        burger.setAttribute('aria-expanded', 'false');
+      }
+    }, 180);
+  });
+
+  /* o botão flutuante some quando o formulário está na tela, para não cobrir o envio */
+  var secOrcamento = document.getElementById('orcamento');
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (e) {
+      floatWpp.classList.toggle('opacity-0', e[0].isIntersecting);
+      floatWpp.classList.toggle('pointer-events-none', e[0].isIntersecting);
+    }, { threshold: 0.12 }).observe(secOrcamento);
+  }
+
+  burger.addEventListener('click', function () {
+    var aberto = !menu.classList.contains('hidden');
+    menu.classList.toggle('hidden', aberto);
+    burger.setAttribute('aria-expanded', String(!aberto));
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A') {
+      menu.classList.add('hidden');
+      burger.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  /* ---------- revelação no scroll ---------- */
+  var alvos = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    alvos.forEach(function (el) { io.observe(el); });
+  } else {
+    alvos.forEach(function (el) { el.classList.add('is-in'); });
+  }
+
+  /* ---------- brilho que segue o cursor ---------- */
+  document.querySelectorAll('.card-glow').forEach(function (card) {
+    card.addEventListener('pointermove', function (e) {
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  /* ---------- máscara de telefone ---------- */
+  var tel = document.getElementById('telefone');
+  tel.addEventListener('input', function () {
+    var v = tel.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 6) {
+      tel.value = '(' + v.slice(0, 2) + ') ' + v.slice(2, v.length === 11 ? 7 : 6) + '-' + v.slice(v.length === 11 ? 7 : 6);
+    } else if (v.length > 2) {
+      tel.value = '(' + v.slice(0, 2) + ') ' + v.slice(2);
+    } else if (v.length > 0) {
+      tel.value = '(' + v;
+    } else {
+      tel.value = '';
+    }
+  });
+
+  /* ---------- data mínima ---------- */
+  var inputData = document.getElementById('data');
+  inputData.min = new Date().toISOString().slice(0, 10);
+
+  /* ---------- montagem da mensagem ---------- */
+  var form = document.getElementById('briefing');
+  var erroBox = document.getElementById('erroForm');
+
+  function val(id) { return (document.getElementById(id).value || '').trim(); }
+  function radio(nome) {
+    var m = form.querySelector('input[name="' + nome + '"]:checked');
+    return m ? m.value : '';
+  }
+  function checks(nome) {
+    return Array.prototype.map.call(form.querySelectorAll('input[name="' + nome + '"]:checked'), function (i) { return i.value; });
+  }
+  function dataBR(iso) {
+    if (!iso) return '';
+    var p = iso.split('-');
+    return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+  }
+
+  function montarMensagem() {
+    var l = [];
+    l.push('*Solicitação de orçamento pelo site*');
+    l.push('');
+    l.push('*Nome:* ' + (val('nome') || '(não informado)'));
+    l.push('*WhatsApp:* ' + (val('telefone') || '(não informado)'));
+    if (val('email')) l.push('*E-mail:* ' + val('email'));
+    l.push('');
+    l.push('*Tipo de evento:* ' + (radio('tipoEvento') || '(não informado)'));
+    l.push('*Público estimado:* ' + (val('publico') || '(não informado)'));
+    l.push('*Data:* ' + (dataBR(val('data')) || '(não informada)'));
+
+    var horario = [];
+    if (val('horaInicio')) horario.push('início às ' + val('horaInicio'));
+    if (val('duracao')) horario.push('duração de ' + val('duracao').toLowerCase());
+    if (horario.length) l.push('*Horário:* ' + horario.join(', '));
+
+    l.push('*Local:* ' + (val('local') || '(não informado)'));
+    if (radio('ambiente')) l.push('*Ambiente:* ' + radio('ambiente'));
+
+    var est = checks('estrutura');
+    l.push('');
+    l.push('*Estrutura desejada:* ' + (est.length ? est.join(', ') : '(a definir)'));
+    if (val('atracoes')) l.push('*Atrações:* ' + val('atracoes'));
+    if (val('investimento')) l.push('*Faixa de investimento:* ' + val('investimento'));
+
+    if (val('observacoes')) {
+      l.push('');
+      l.push('*Observações:*');
+      l.push(val('observacoes'));
+    }
+    return l.join('\n');
+  }
+
+  /* ---------- limpa o destaque de erro conforme o usuário corrige ---------- */
+  form.addEventListener('input', limparErros);
+  form.addEventListener('change', limparErros);
+
+  function limparErros(e) {
+    if (e.target.classList) e.target.classList.remove('err');
+    if (e.target.name === 'tipoEvento') destacarGrupo('tipoEventoGroup', false);
+    if (e.target.name === 'estrutura') destacarGrupo('estruturaGroup', false);
+  }
+
+  function destacarGrupo(id, comErro) {
+    var g = document.getElementById(id);
+    g.classList.toggle('ring-1', comErro);
+    g.classList.toggle('ring-red-400/50', comErro);
+    g.classList.toggle('rounded-xl', comErro);
+    g.classList.toggle('p-3', comErro);
+    g.classList.toggle('-m-3', comErro);
+  }
+
+  /* ---------- validação e envio ---------- */
+  function marcarErro(el, tem) {
+    if (el) el.classList.toggle('err', tem);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var faltando = [];
+
+    var obrigatorios = [
+      { id: 'nome', rotulo: 'seu nome' },
+      { id: 'telefone', rotulo: 'seu WhatsApp' },
+      { id: 'data', rotulo: 'a data do evento' },
+      { id: 'publico', rotulo: 'o número de pessoas' },
+      { id: 'local', rotulo: 'o local do evento' }
+    ];
+
+    obrigatorios.forEach(function (campo) {
+      var el = document.getElementById(campo.id);
+      var vazio = !el.value.trim();
+      marcarErro(el, vazio);
+      if (vazio) faltando.push(campo.rotulo);
+    });
+
+    var tipoOk = !!radio('tipoEvento');
+    destacarGrupo('tipoEventoGroup', !tipoOk);
+    if (!tipoOk) faltando.push('o tipo de evento');
+
+    var estOk = checks('estrutura').length > 0;
+    destacarGrupo('estruturaGroup', !estOk);
+    if (!estOk) faltando.push('ao menos um item de estrutura');
+
+    var tel10 = val('telefone').replace(/\D/g, '').length >= 10;
+    if (val('telefone') && !tel10) {
+      marcarErro(document.getElementById('telefone'), true);
+      faltando.push('um WhatsApp com DDD');
+    }
+
+    if (faltando.length) {
+      erroBox.textContent = 'Falta preencher: ' + faltando.join(', ') + '.';
+      erroBox.classList.remove('hidden');
+      erroBox.classList.add('flex');
+      var primeiro = form.querySelector('.err') || document.getElementById('tipoEventoGroup');
+      primeiro.scrollIntoView({ behavior: reduz ? 'auto' : 'smooth', block: 'center' });
+      if (primeiro.focus) primeiro.focus({ preventScroll: true });
+      return;
+    }
+
+    erroBox.classList.add('hidden');
+    erroBox.classList.remove('flex');
+
+    var url = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(montarMensagem());
+    window.open(url, '_blank', 'noopener');
+  });
+})();
+</script>
+</body>
+</html>
