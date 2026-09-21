@@ -3,13 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>IJ Som | Som, painéis de LED e estrutura para eventos</title>
+<title>IJ Som | Estrutura completa para eventos</title>
 <meta name="description" content="Estrutura completa para eventos: sonorização com mesa digital, painéis de LED, iluminação, palco e equipe técnica. Casamentos, 15 anos, corporativos, workshops e shows.">
 <meta name="theme-color" content="#060A0F">
 <meta property="og:title" content="IJ Som | Estrutura completa para eventos">
-<meta property="og:description" content="Som, painéis de LED, iluminação e palco com equipamento de ponta e equipe técnica do início ao fim.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 126'%3E%3Crect width='150' height='126' rx='28' fill='%232C4A64'/%3E%3Cg fill='white'%3E%3Cpath d='M14 26h28v52c0 12 9 19 23 19h4c14 0 23-7 23-19V26h28v54c0 27-21 44-51 44h-4c-30 0-51-17-51-44z'/%3E%3Crect x='60' y='0' width='26' height='20' rx='3'/%3E%3Crect x='60' y='30' width='26' height='44' rx='3'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="img/icon.png ">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -105,6 +104,77 @@ tailwind.config = {
 
   .marquee-track{ animation:slide 34s linear infinite }
   @keyframes slide{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+
+  /* ---------- Instagram: fundo com deriva lenta e pilha de fotos ---------- */
+  .ig-drift{ animation:ig-drift 34s ease-in-out infinite alternate; will-change:transform; }
+  @keyframes ig-drift{
+    from{ transform:scale(1.14) translate3d(-1.5%,1.5%,0) }
+    to  { transform:scale(1.24) translate3d(1.5%,-1.5%,0) }
+  }
+  /* as fotos abrem em leque quando o mouse passa pela pilha */
+  .ig-card{ transition:transform .7s cubic-bezier(.16,1,.3,1), box-shadow .7s; }
+  @media (min-width:640px){
+    .ig-card:nth-child(1){ transform:rotate(-7deg) translateY(4%) }
+    .ig-card:nth-child(2){ transform:rotate(1.5deg) translateY(-5%) scale(1.06); z-index:2 }
+    .ig-card:nth-child(3){ transform:rotate(7deg) translateY(4%) }
+  }
+  @media (min-width:640px) and (hover:hover){
+    .ig-stack:hover .ig-card:nth-child(1){ transform:rotate(-11deg) translate(-9%,-2%) }
+    .ig-stack:hover .ig-card:nth-child(2){ transform:rotate(0deg) translateY(-10%) scale(1.1) }
+    .ig-stack:hover .ig-card:nth-child(3){ transform:rotate(11deg) translate(9%,-2%) }
+  }
+  /* brilho que atravessa o botão no hover */
+  .shine{ position:relative; overflow:hidden; isolation:isolate; }
+  .shine::after{
+    content:""; position:absolute; inset:0; z-index:1; pointer-events:none; transform:translateX(-130%);
+    background:linear-gradient(100deg, transparent 25%, rgba(255,255,255,.22) 50%, transparent 75%);
+    transition:transform .85s cubic-bezier(.16,1,.3,1);
+  }
+  .shine:hover::after, .shine:focus-visible::after{ transform:translateX(130%) }
+
+  /* ---------- formulário: trilho de progresso ---------- */
+  .panel{ scroll-margin-top:110px; }
+  .step{ transition:background-color .25s, color .25s; }
+  .step:hover{ background:rgba(255,255,255,.04) }
+  .step.is-active{ background:rgba(255,255,255,.06) }
+  .step.is-active .step-label{ color:#fff }
+  .step.is-active .step-dot{ border-color:rgba(60,193,245,.55); background:rgba(18,165,227,.14); color:#7FDCFF }
+  .step-dot{ transition:all .3s }
+  /* concluído vem depois de .is-active: quando o passo está nos dois estados, o check vence */
+  .step.is-done .step-dot,
+  .painel-check.is-done{
+    background:#12A5E3; border-color:#12A5E3; color:transparent;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4L19 7'/%3E%3C/svg%3E");
+    background-size:.72rem; background-position:center; background-repeat:no-repeat;
+  }
+  .painel-check{ opacity:0; transform:scale(.7); transition:opacity .35s, transform .35s cubic-bezier(.16,1,.3,1) }
+  .painel-check.is-done{ opacity:1; transform:none }
+
+  /* ---------- formulário: campos e chips ---------- */
+  .field:hover:not(:focus){ border-color:rgba(255,255,255,.2) }
+  /* barra azul à esquerda marca o que já está preenchido */
+  .field.is-filled{ box-shadow:inset 2px 0 0 rgba(18,165,227,.75) }
+  .field.is-filled:focus{ box-shadow:inset 2px 0 0 #12A5E3, 0 0 0 3px rgba(18,165,227,.18) }
+  .field.err.is-filled{ box-shadow:inset 2px 0 0 #f87171, 0 0 0 3px rgba(248,113,113,.15) }
+
+  /* o marcador mostra de cara se a escolha é única (círculo) ou múltipla (quadrado) */
+  .chip span{ padding-left:2.55rem }
+  .chip span::before{
+    content:""; position:absolute; left:.9rem; top:50%; transform:translateY(-50%);
+    width:1.05rem; height:1.05rem; border-radius:.35rem;
+    border:1.5px solid rgba(255,255,255,.28); background:rgba(255,255,255,.04);
+    transition:background-color .2s, border-color .2s, box-shadow .2s;
+  }
+  .chip input[type=radio] + span::before{ border-radius:50% }
+  .chip input:checked + span::before{
+    background:#12A5E3; border-color:#12A5E3;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4L19 7'/%3E%3C/svg%3E");
+    background-size:.7rem; background-position:center; background-repeat:no-repeat;
+  }
+  .chip input[type=radio]:checked + span::before{ background-image:none; box-shadow:inset 0 0 0 3.5px #0A1017 }
+  .chip span{ transition:border-color .2s, background-color .2s, color .2s, box-shadow .2s, transform .2s }
+  @media (hover:hover){ .chip:hover span{ transform:translateY(-1px) } }
 
   /* --------- ajustes de celular --------- */
   /* abaixo de 16px o iOS dá zoom sozinho ao focar o campo */
@@ -238,61 +308,67 @@ tailwind.config = {
 </div>
 
 <!-- ====================== EVENTOS ====================== -->
-<section id="eventos" class="relative py-16 sm:py-28">
-  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+
+<section id="eventos" class="relative overflow-hidden bg-slate-100 py-16 sm:py-28">
+  <!-- degradês que costuram o bloco claro com as seções escuras de cima e de baixo -->
+  <div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink-900/20 to-transparent"></div>
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-900/20 to-transparent"></div>
+  <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-azul-500/60 to-transparent"></div>
+
+  <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
     <div class="reveal max-w-2xl">
-      <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">O que a gente atende</p>
-      <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Cada evento pede uma montagem diferente</h2>
-      <p class="mt-5 text-slate-400">Um casamento de 200 pessoas em salão fechado não precisa do mesmo PA de um show ao ar livre. A gente dimensiona a estrutura pelo seu evento, não por um pacote pronto de prateleira.</p>
+      <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-700">O que a gente atende</p>
+      <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-5xl">Cada evento pede uma montagem diferente</h2>
+      <p class="mt-5 text-slate-700">Um casamento de 200 pessoas em salão fechado não precisa do mesmo PA de um show ao ar livre. A gente dimensiona a estrutura pelo seu evento, não por um pacote pronto de prateleira.</p>
     </div>
 
-    <div class="mt-10 grid gap-4 sm:mt-14 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40">
-        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+    <div class="mt-10 grid gap-4 sm:mt-14 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
           <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M12 21s-7-4.5-7-9.5A3.5 3.5 0 0 1 12 9a3.5 3.5 0 0 1 7 2.5C19 16.5 12 21 12 21Z"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-white">Casamento</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Cerimônia, recepção e pista com sonorização separada por ambiente. Microfone sem fio para celebrante e votos, iluminação da mesa e do bolo, painel de LED para o retrospectivo.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Casamento</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Cerimônia, recepção e pista com sonorização separada por ambiente. Microfone sem fio para celebrante e votos, iluminação da mesa e do bolo, painel de LED para o retrospectivo.</p>
       </article>
 
-      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:80ms">
-        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:80ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
           <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="m12 3 2.4 5.5L20 9.3l-4 4 1 5.7-5-2.8-5 2.8 1-5.7-4-4 5.6-.8Z"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-white">Festa de 15 anos</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Entrada, valsa e balada no mesmo lugar, com trocas de cena bem marcadas. Luz que acompanha a coreografia, LED para os vídeos e som pesado o suficiente para a pista.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Festa de 15 anos</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Entrada, valsa e balada no mesmo lugar, com trocas de cena bem marcadas. Luz que acompanha a coreografia, LED para os vídeos e som pesado o suficiente para a pista.</p>
       </article>
 
-      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:160ms">
-        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:160ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
           <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M3 21V9l9-6 9 6v12M9 21v-6h6v6"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-white">Evento corporativo</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Convenção, lançamento, premiação ou confraternização. Painel de LED no palco, microfones para mesa e plateia, operação discreta e cronograma seguido à risca.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Evento corporativo</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Convenção, lançamento, premiação ou confraternização. Painel de LED no palco, microfones para mesa e plateia, operação discreta e cronograma seguido à risca.</p>
       </article>
 
-      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:40ms">
-        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:40ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
           <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M4 5h16v11H4zM8 21h8M12 16v5"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-white">Workshop e treinamento</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Inteligibilidade em primeiro lugar. Headset para quem apresenta, projeção ou LED com slides legíveis do fundo da sala e captação limpa quando o conteúdo vai ser gravado.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Workshop e treinamento</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Inteligibilidade em primeiro lugar. Headset para quem apresenta, projeção ou LED com slides legíveis do fundo da sala e captação limpa quando o conteúdo vai ser gravado.</p>
       </article>
 
-      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:120ms">
-        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:120ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
           <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm11-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-white">Show e festival</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">PA dimensionado para o público, monitoração de palco, backline organizado e passagem de som no horário combinado com a banda. Rider recebido com antecedência.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Show e festival</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">PA dimensionado para o público, monitoração de palco, backline organizado e passagem de som no horário combinado com a banda. Rider recebido com antecedência.</p>
       </article>
 
-      <article class="card-glow reveal group rounded-2xl border border-white/8 bg-ink-800/60 p-6 transition sm:p-7 hover:-translate-y-1 hover:border-azul-500/40" style="--d:200ms">
-        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-500/12 text-azul-400">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:200ms">
+        <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
           <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5zM5 11v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-white">Formatura e confraternização</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Colação, jantar e festa com equipes e equipamentos que aguentam a noite inteira. Nomes na tela, trilha sincronizada e transição entre os blocos sem silêncio constrangedor.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Formatura e confraternização</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Colação, jantar e festa com equipes e equipamentos que aguentam a noite inteira. Nomes na tela, trilha sincronizada e transição entre os blocos sem silêncio constrangedor.</p>
       </article>
     </div>
   </div>
@@ -312,116 +388,170 @@ tailwind.config = {
       <p class="max-w-md text-slate-400">Equipamento próprio, revisado antes de cada saída. Você fecha com uma empresa só e não precisa coordenar cinco fornecedores no dia.</p>
     </div>
 
-    <div class="mt-10 grid gap-10 sm:mt-14 lg:grid-cols-2 lg:gap-14">
+    <div class="mt-12 space-y-14 sm:mt-16 sm:space-y-24">
 
-      <!-- Fotos reais de montagem. Para trocar ou acrescentar, basta apontar para outro arquivo em img/ -->
-      <div class="reveal grid grid-cols-2 gap-3 sm:gap-4">
-        <figure class="col-span-2 overflow-hidden rounded-2xl border border-white/10">
-          <img src="img/palco.jpg" alt="Palco montado com painel de LED, moving heads e caixas de retorno"
-               loading="lazy" decoding="async"
-               class="aspect-[16/11] w-full object-cover object-center transition duration-700 hover:scale-105 sm:aspect-[16/10]">
+      <!-- Bloco 1 — foto à esquerda -->
+      <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
+        <figure class="reveal group relative lg:col-span-5 lg:col-start-1 lg:row-start-1">
+          <div class="pointer-events-none absolute -bottom-4 -left-4 h-28 w-28 rounded-bl-3xl border-b border-l border-azul-500/45 sm:-bottom-6 sm:-left-6 sm:h-36 sm:w-36"></div>
+          <div class="relative overflow-hidden rounded-3xl border border-white/10">
+            <img src="img/mesa.jpg" alt="Técnico da IJ Som operando a mesa digital durante o evento"
+                 loading="lazy" decoding="async"
+                 class="aspect-[4/5] w-full object-cover object-center transition duration-700 group-hover:scale-105 lg:aspect-square">
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/80 via-ink-900/10 to-transparent"></div>
+            <figcaption class="absolute inset-x-5 bottom-5 font-display text-sm font-medium text-white/90">Mesa digital com cena salva para o seu evento</figcaption>
+          </div>
         </figure>
-        <figure class="overflow-hidden rounded-2xl border border-white/10">
-          <img src="img/mesa.jpg" alt="Técnico da IJ Som operando a mesa durante o evento"
-               loading="lazy" decoding="async"
-               class="aspect-[3/4] w-full object-cover object-center transition duration-700 hover:scale-105">
-        </figure>
-        <figure class="overflow-hidden rounded-2xl border border-white/10">
-          <img src="img/festival.jpg" alt="Equipe instalando microfone headset em apresentadora de evento cultural"
-               loading="lazy" decoding="async"
-               class="aspect-[3/4] w-full object-cover object-center transition duration-700 hover:scale-105">
-        </figure>
+
+        <div class="reveal lg:col-span-6 lg:col-start-7 lg:row-start-1" style="--d:120ms">
+          <div class="space-y-9 sm:space-y-11">
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">01</span>
+                <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
+              </div>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Sonorização</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Mesa digital com cena salva por evento, line array ou caixas ativas conforme o público, microfones sem fio, headset e lapela, retornos e monitoração in ear.</p>
+            </div>
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">02</span>
+                <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
+              </div>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Painéis de LED e vídeo</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Painéis de alta resolução em vários formatos, processamento de imagem ao vivo, exibição de vídeos e marcas, telão para cerimônia e transmissão.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <dl class="reveal divide-y divide-white/10 border-y border-white/10" style="--d:120ms">
-        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
-          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">01</span>
-          <div>
-            <dt class="font-display text-base font-semibold text-white">Sonorização</dt>
-            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Mesa digital com cena salva por evento, line array ou caixas ativas conforme o público, microfones sem fio, headset e lapela, retornos e monitoração in ear.</dd>
+      <!-- Bloco 2 — foto à direita -->
+      <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
+        <figure class="reveal group relative lg:col-span-5 lg:col-start-8 lg:row-start-1">
+          <div class="pointer-events-none absolute -bottom-4 -right-4 h-28 w-28 rounded-br-3xl border-b border-r border-azul-500/45 sm:-bottom-6 sm:-right-6 sm:h-36 sm:w-36"></div>
+          <div class="relative overflow-hidden rounded-3xl border border-white/10">
+            <img src="img/palco.jpg" alt="Palco montado com painel de LED, moving heads e caixas de retorno"
+                 loading="lazy" decoding="async"
+                 class="aspect-[4/5] w-full object-cover object-center transition duration-700 group-hover:scale-105 lg:aspect-square">
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/80 via-ink-900/10 to-transparent"></div>
+            <figcaption class="absolute inset-x-5 bottom-5 font-display text-sm font-medium text-white/90">Palco, LED e desenho de luz montados no local</figcaption>
+          </div>
+        </figure>
+
+        <div class="reveal lg:col-span-6 lg:col-start-1 lg:row-start-1" style="--d:120ms">
+          <div class="space-y-9 sm:space-y-11">
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">03</span>
+                <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
+              </div>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Iluminação cênica</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Moving heads, par LED e efeitos, com desenho de luz pensado para cada momento da festa, além da ambientação de mesas e da arquitetura do espaço.</p>
+            </div>
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">04</span>
+                <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
+              </div>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Palco e estrutura</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Praticáveis e palcos de diversos tamanhos, box truss, ground support e torres, com montagem dimensionada para o local e acabamento na frente do público.</p>
+            </div>
           </div>
         </div>
-        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
-          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">02</span>
-          <div>
-            <dt class="font-display text-base font-semibold text-white">Painéis de LED e vídeo</dt>
-            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Painéis de alta resolução em vários formatos, processamento de imagem ao vivo, exibição de vídeos e marcas, telão para cerimônia e transmissão.</dd>
+      </div>
+
+      <!-- Bloco 3 — foto à esquerda -->
+      <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
+        <figure class="reveal group relative lg:col-span-5 lg:col-start-1 lg:row-start-1">
+          <div class="pointer-events-none absolute -bottom-4 -left-4 h-28 w-28 rounded-bl-3xl border-b border-l border-azul-500/45 sm:-bottom-6 sm:-left-6 sm:h-36 sm:w-36"></div>
+          <div class="relative overflow-hidden rounded-3xl border border-white/10">
+            <img src="img/festival.jpg" alt="Equipe instalando microfone headset em apresentadora de evento cultural"
+                 loading="lazy" decoding="async"
+                 class="aspect-[4/5] w-full object-cover object-center transition duration-700 group-hover:scale-105 lg:aspect-square">
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/80 via-ink-900/10 to-transparent"></div>
+            <figcaption class="absolute inset-x-5 bottom-5 font-display text-sm font-medium text-white/90">Equipe no local do começo ao fim</figcaption>
+          </div>
+        </figure>
+
+        <div class="reveal lg:col-span-6 lg:col-start-7 lg:row-start-1" style="--d:120ms">
+          <div class="space-y-9 sm:space-y-11">
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">05</span>
+                <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
+              </div>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Energia e infraestrutura</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Distribuição e quadros de energia, cabeamento passado e protegido, conferência de carga antes da montagem e gerador quando o local pede.</p>
+            </div>
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">06</span>
+                <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
+              </div>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Equipe técnica</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Operadores de som, luz e vídeo, montagem e desmontagem completas e técnico de plantão do início ao fim do evento.</p>
+            </div>
           </div>
         </div>
-        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
-          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">03</span>
-          <div>
-            <dt class="font-display text-base font-semibold text-white">Iluminação cênica</dt>
-            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Moving heads, par LED e efeitos, com desenho de luz pensado para cada momento da festa, além da ambientação de mesas e da arquitetura do espaço.</dd>
-          </div>
-        </div>
-        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
-          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">04</span>
-          <div>
-            <dt class="font-display text-base font-semibold text-white">Palco e estrutura</dt>
-            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Praticáveis e palcos de diversos tamanhos, box truss, ground support e torres, com montagem dimensionada para o local e acabamento na frente do público.</dd>
-          </div>
-        </div>
-        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
-          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">05</span>
-          <div>
-            <dt class="font-display text-base font-semibold text-white">Energia e infraestrutura</dt>
-            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Distribuição e quadros de energia, cabeamento passado e protegido, conferência de carga antes da montagem e gerador quando o local pede.</dd>
-          </div>
-        </div>
-        <div class="flex gap-4 py-5 sm:gap-6 sm:py-6">
-          <span class="w-6 shrink-0 pt-1 font-display text-xs font-semibold tracking-widest text-azul-500">06</span>
-          <div>
-            <dt class="font-display text-base font-semibold text-white">Equipe técnica</dt>
-            <dd class="mt-1.5 text-sm leading-relaxed text-slate-400">Operadores de som, luz e vídeo, montagem e desmontagem completas e técnico de plantão do início ao fim do evento.</dd>
-          </div>
-        </div>
-      </dl>
+      </div>
+
     </div>
   </div>
 </section>
 
 <!-- ====================== PROCESSO ====================== -->
-<section id="processo" class="py-16 sm:py-28">
-  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+   
+<section id="processo" class="relative overflow-hidden bg-slate-100 py-16 sm:py-28">
+  <!-- degradês que costuram o bloco claro com as seções escuras de cima e de baixo -->
+  <div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink-900/20 to-transparent"></div>
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-900/20 to-transparent"></div>
+  <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-azul-500/60 to-transparent"></div>
+
+  <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
     <div class="reveal max-w-2xl">
-      <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Como funciona</p>
-      <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Do primeiro contato até a desmontagem</h2>
+      <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-700">Como funciona</p>
+      <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-5xl">Do primeiro contato até a desmontagem</h2>
+      <p class="mt-5 leading-relaxed text-slate-700">Quatro etapas, sem surpresa no meio do caminho. Você sabe o que acontece em cada uma delas e com quem falar.</p>
     </div>
 
-    <ol class="relative mt-10 grid gap-8 sm:mt-14 sm:grid-cols-2 lg:grid-cols-4">
-      <li class="reveal relative">
-        <div class="flex items-center gap-3">
-          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-azul-500/40 bg-azul-500/10 font-display text-sm font-semibold text-azul-300">01</span>
-          <div class="h-px flex-1 bg-gradient-to-r from-azul-500/40 to-transparent"></div>
-        </div>
-        <h3 class="mt-5 font-display text-lg font-semibold text-white">Você conta o evento</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Pelo formulário aqui do site ou direto no WhatsApp. Quanto mais detalhe sobre local, público e horário, mais rápido volta uma proposta que faz sentido.</p>
-      </li>
-      <li class="reveal relative" style="--d:100ms">
-        <div class="flex items-center gap-3">
-          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-azul-500/40 bg-azul-500/10 font-display text-sm font-semibold text-azul-300">02</span>
-          <div class="h-px flex-1 bg-gradient-to-r from-azul-500/40 to-transparent"></div>
-        </div>
-        <h3 class="mt-5 font-display text-lg font-semibold text-white">Proposta sob medida</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Montamos o orçamento com o que o seu evento realmente precisa. Se um item não vai ser usado, a gente tira e explica o porquê.</p>
-      </li>
-      <li class="reveal relative" style="--d:200ms">
-        <div class="flex items-center gap-3">
-          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-azul-500/40 bg-azul-500/10 font-display text-sm font-semibold text-azul-300">03</span>
-          <div class="h-px flex-1 bg-gradient-to-r from-azul-500/40 to-transparent"></div>
-        </div>
-        <h3 class="mt-5 font-display text-lg font-semibold text-white">Visita e planejamento</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Quando o local pede, vamos até ele conferir energia, acesso, pé direito e posicionamento. Alinhamos o cronograma com você e com os outros fornecedores.</p>
-      </li>
-      <li class="reveal relative" style="--d:300ms">
-        <div class="flex items-center gap-3">
-          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-azul-500/40 bg-azul-500/10 font-display text-sm font-semibold text-azul-300">04</span>
-        </div>
-        <h3 class="mt-5 font-display text-lg font-semibold text-white">Montagem e operação</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-400">Chegamos cedo, testamos tudo antes de abrir as portas e ficamos com a equipe no local do começo ao fim. A desmontagem também é nossa.</p>
-      </li>
-    </ol>
+    <div class="relative mt-10 sm:mt-14">
+      <!-- linha que costura os quatro passos no desktop, visível só nos vãos entre os cartões -->
+      <div class="pointer-events-none absolute inset-x-0 top-[2.875rem] hidden h-px bg-gradient-to-r from-azul-500/0 via-azul-600/50 to-azul-500/0 lg:block"></div>
+
+      <ol class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+        <li class="reveal group relative rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)]">
+          <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-sm font-semibold text-white shadow-lg shadow-azul-600/25">01</span>
+          <h3 class="mt-5 font-display text-lg font-semibold text-ink-900">Você conta o evento</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">Pelo formulário aqui do site ou direto no WhatsApp. Quanto mais detalhe sobre local, público e horário, mais rápido volta uma proposta que faz sentido.</p>
+        </li>
+
+        <li class="reveal group relative rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)]" style="--d:100ms">
+          <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-sm font-semibold text-white shadow-lg shadow-azul-600/25">02</span>
+          <h3 class="mt-5 font-display text-lg font-semibold text-ink-900">Proposta sob medida</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">Montamos o orçamento com o que o seu evento realmente precisa. Se um item não vai ser usado, a gente tira e explica o porquê.</p>
+        </li>
+
+        <li class="reveal group relative rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)]" style="--d:200ms">
+          <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-sm font-semibold text-white shadow-lg shadow-azul-600/25">03</span>
+          <h3 class="mt-5 font-display text-lg font-semibold text-ink-900">Visita e planejamento</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">Quando o local pede, vamos até ele conferir energia, acesso, pé direito e posicionamento. Alinhamos o cronograma com você e com os outros fornecedores.</p>
+        </li>
+
+        <li class="reveal group relative rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)]" style="--d:300ms">
+          <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-sm font-semibold text-white shadow-lg shadow-azul-600/25">04</span>
+          <h3 class="mt-5 font-display text-lg font-semibold text-ink-900">Montagem e operação</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">Chegamos cedo, testamos tudo antes de abrir as portas e ficamos com a equipe no local do começo ao fim. A desmontagem também é nossa.</p>
+        </li>
+      </ol>
+    </div>
+
+    <div class="reveal mt-10 flex flex-col items-start gap-4 border-t border-slate-200 pt-8 sm:flex-row sm:items-center sm:justify-between" style="--d:400ms">
+      <p class="text-sm text-slate-700">Ficou com dúvida em alguma etapa? A gente explica antes de você fechar qualquer coisa.</p>
+      <a href="#orcamento" class="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-ink-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-steel-700">
+        Começar pelo passo 01
+        <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform group-hover:translate-x-1" fill="none" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -469,198 +599,321 @@ tailwind.config = {
   </div>
 </section>
 
-<!-- ====================== INSTAGRAM ====================== -->
-<section class="py-16 sm:py-24">
-  <div class="mx-auto max-w-6xl px-5 sm:px-8">
-    <div class="reveal card-glow relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-steel-700/40 via-ink-800 to-ink-900 p-7 sm:p-14">
-      <div class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-azul-500/15 blur-3xl"></div>
-      <div class="relative flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
-        <div class="max-w-xl">
-          <h2 class="font-display text-2xl font-semibold leading-tight text-white sm:text-4xl">Veja as montagens no Instagram</h2>
-          <p class="mt-4 leading-relaxed text-slate-400">Bastidores, palcos prontos e festas rolando. É o jeito mais rápido de conferir o padrão do que entregamos antes de fechar.</p>
-        </div>
+<!-- ====================== INSTAGRAM ======================
+     Faixa de borda a borda: foto tratada ao fundo, trilhos de luz da marca
+     e as fotos em pilha na frente, que abrem em leque no hover. -->
+<section id="instagram" class="relative isolate overflow-hidden">
+  <div class="absolute inset-0 -z-10">
+    <img src="img/palco.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async"
+         class="ig-drift h-full w-full object-cover object-[50%_82%] opacity-[.55] blur-[2px] saturate-[.7]">
+    <div class="absolute inset-0 bg-[radial-gradient(85%_75%_at_15%_10%,rgba(18,165,227,.30),transparent_62%)]"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-ink-900/95 via-ink-900/85 to-steel-900/75"></div>
+    <div class="beam wide" style="left:6%; animation-delay:-2s"></div>
+    <div class="beam" style="left:26%; animation-delay:-5s"></div>
+    <div class="beam wide" style="left:94%; animation-delay:-4s"></div>
+    <div class="absolute inset-0 grain opacity-40"></div>
+    <div class="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-ink-900 to-transparent"></div>
+    <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-ink-900 to-transparent"></div>
+  </div>
+
+  <div class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+    <div class="grid items-center gap-14 lg:grid-cols-[1.08fr_1fr] lg:gap-16">
+
+      <div class="reveal">
+        <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium tracking-wide text-slate-200 backdrop-blur">
+          <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 fill-current" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2 0 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-1.8-.2-2.2-.4a3.8 3.8 0 0 1-1.4-.9 3.8 3.8 0 0 1-.9-1.4c-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c0-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1m0 3.3a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13m0 10.7a4.2 4.2 0 1 1 0-8.4 4.2 4.2 0 0 1 0 8.4m6.8-10.9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg>
+          Instagram
+        </span>
+
+        <h2 class="mt-6 font-display text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+          O feed é o nosso<br class="hidden sm:block"> portfólio em dia
+        </h2>
+        <p class="mt-5 max-w-lg leading-relaxed text-slate-300">Bastidores, palcos prontos e festas rolando. É o jeito mais rápido de conferir o padrão do que entregamos antes de fechar.</p>
+
         <a href="https://www.instagram.com/ijsomeventos?stkn=YmVwYm1jb2ZreTBt" target="_blank" rel="noopener"
-           class="group inline-flex shrink-0 items-center gap-3 rounded-xl border border-white/15 bg-white/5 px-6 py-4 font-semibold text-white backdrop-blur transition hover:border-azul-400 hover:bg-white/10">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2 0 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-1.8-.2-2.2-.4a3.8 3.8 0 0 1-1.4-.9 3.8 3.8 0 0 1-.9-1.4c-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c0-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1m0 3.3a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13m0 10.7a4.2 4.2 0 1 1 0-8.4 4.2 4.2 0 0 1 0 8.4m6.8-10.9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg>
-          @ijsomeventos
+           class="shine group mt-9 inline-flex items-center gap-4 rounded-2xl border border-white/15 bg-white/[.07] py-3 pl-3 pr-6 backdrop-blur-xl transition duration-300 hover:border-azul-400/70 hover:bg-white/[.12] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul-400">
+          <span class="relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 text-white shadow-lg shadow-azul-600/30 transition duration-500 group-hover:scale-105">
+            <svg viewBox="0 0 24 24" class="h-6 w-6 fill-current" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2 0 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-1.8-.2-2.2-.4a3.8 3.8 0 0 1-1.4-.9 3.8 3.8 0 0 1-.9-1.4c-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c0-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1m0 3.3a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13m0 10.7a4.2 4.2 0 1 1 0-8.4 4.2 4.2 0 0 1 0 8.4m6.8-10.9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg>
+          </span>
+          <span class="relative z-10 text-left">
+            <span class="block text-[11px] font-medium uppercase tracking-[.18em] text-slate-400">Seguir no Instagram</span>
+            <span class="block font-display text-lg font-semibold text-white">@ijsomeventos</span>
+          </span>
+          <svg viewBox="0 0 24 24" class="relative z-10 h-4 w-4 shrink-0 stroke-current text-slate-300 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
       </div>
+
+      <!-- pilha de fotos: leque no hover, três quadrados como no próprio feed -->
+      <a href="https://www.instagram.com/ijsomeventos?stkn=YmVwYm1jb2ZreTBt" target="_blank" rel="noopener"
+         aria-label="Abrir o Instagram @ijsomeventos"
+         class="reveal ig-stack group flex items-center justify-center gap-2.5 rounded-3xl sm:gap-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-azul-400" style="--d:140ms">
+        <figure class="ig-card relative w-1/3 shrink-0 overflow-hidden sm:w-[35%] rounded-2xl border border-white/15 shadow-2xl shadow-black/60 sm:rounded-3xl">
+          <img src="img/mesa.jpg" alt="Técnico operando a mesa digital em evento" loading="lazy" decoding="async"
+               class="aspect-square w-full object-cover object-center">
+          <div class="absolute inset-0 bg-gradient-to-t from-ink-900/50 to-transparent"></div>
+        </figure>
+        <figure class="ig-card relative w-1/3 shrink-0 overflow-hidden sm:-ml-[5%] sm:w-[38%] rounded-2xl border border-white/20 shadow-2xl shadow-black/70 sm:rounded-3xl">
+          <img src="img/palco.jpg" alt="Palco com painel de LED e iluminação cênica montados" loading="lazy" decoding="async"
+               class="aspect-square w-full object-cover object-center">
+          <div class="absolute inset-0 bg-gradient-to-t from-ink-900/45 to-transparent"></div>
+        </figure>
+        <figure class="ig-card relative w-1/3 shrink-0 overflow-hidden sm:-ml-[5%] sm:w-[35%] rounded-2xl border border-white/15 shadow-2xl shadow-black/60 sm:rounded-3xl">
+          <img src="img/festival.jpg" alt="Equipe instalando microfone headset em evento cultural" loading="lazy" decoding="async"
+               class="aspect-square w-full object-cover object-center">
+          <div class="absolute inset-0 bg-gradient-to-t from-ink-900/50 to-transparent"></div>
+        </figure>
+      </a>
+
     </div>
   </div>
 </section>
 
 <!-- ====================== FORMULÁRIO ====================== -->
-<section id="orcamento" class="relative overflow-hidden border-t border-white/5 py-16 sm:py-28">
+
+<section id="orcamento" class="relative border-t border-white/5 py-16 sm:py-28">
   <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(80%_50%_at_50%_100%,#0E2233_0%,#060A0F_60%)]"></div>
 
-  <div class="mx-auto max-w-4xl px-5 sm:px-8">
-    <div class="reveal text-center">
+  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="reveal mx-auto max-w-2xl text-center">
       <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Orçamento</p>
       <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Conte sobre o seu evento</h2>
       <p class="mx-auto mt-5 max-w-xl text-slate-400">Preencha os campos abaixo e o resumo é enviado direto para o nosso WhatsApp, já organizado. Leva menos de dois minutos e adianta boa parte da conversa.</p>
     </div>
 
-    <form id="briefing" novalidate class="reveal mt-10 space-y-6 sm:mt-14 sm:space-y-10" style="--d:100ms">
+    <div class="mt-10 grid gap-10 sm:mt-14 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-14">
 
-      <!-- Bloco 1 -->
-      <fieldset class="rounded-3xl border border-white/8 bg-ink-800/50 p-6 backdrop-blur sm:p-9">
-        <legend class="flex items-center gap-3 px-2">
-          <span class="grid h-7 w-7 place-items-center rounded-lg bg-azul-500/15 font-display text-xs font-semibold text-azul-300">1</span>
-          <span class="font-display text-base font-semibold text-white">Seus dados</span>
-        </legend>
+      <!-- trilho lateral: mostra onde você está e o que já respondeu -->
+      <aside class="reveal hidden lg:block">
+        <div class="sticky top-28 rounded-3xl border border-white/10 bg-ink-800/50 p-6 backdrop-blur-xl">
+          <p class="text-xs font-semibold uppercase tracking-[.2em] text-slate-500">Seu briefing</p>
+          <p class="mt-4 flex items-baseline gap-2">
+            <span data-prog-num class="font-display text-4xl font-semibold leading-none text-white">0</span>
+            <span class="text-sm text-slate-400">de 7 essenciais</span>
+          </p>
+          <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div data-prog-bar class="h-full w-0 rounded-full bg-gradient-to-r from-azul-600 to-azul-400 transition-[width] duration-500 ease-out"></div>
+          </div>
 
-        <div class="mt-7 grid gap-5 sm:grid-cols-2">
-          <div>
-            <label for="nome" class="mb-2 block text-sm font-medium text-slate-300">Nome completo <span class="text-azul-400">*</span></label>
-            <input id="nome" name="nome" type="text" class="field" placeholder="Como podemos te chamar" autocomplete="name">
+          <nav class="mt-7 space-y-1">
+            <a href="#passo1" data-passo="passo1" class="step flex items-start gap-3 rounded-xl px-3 py-2.5">
+              <span class="step-dot mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg border border-white/15 font-display text-[11px] font-semibold text-slate-400">1</span>
+              <span>
+                <span class="step-label block text-sm font-medium text-slate-400">Seus dados</span>
+                <span class="block text-xs text-slate-500">Nome e WhatsApp</span>
+              </span>
+            </a>
+            <a href="#passo2" data-passo="passo2" class="step flex items-start gap-3 rounded-xl px-3 py-2.5">
+              <span class="step-dot mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg border border-white/15 font-display text-[11px] font-semibold text-slate-400">2</span>
+              <span>
+                <span class="step-label block text-sm font-medium text-slate-400">Sobre o evento</span>
+                <span class="block text-xs text-slate-500">Tipo, data, público e local</span>
+              </span>
+            </a>
+            <a href="#passo3" data-passo="passo3" class="step flex items-start gap-3 rounded-xl px-3 py-2.5">
+              <span class="step-dot mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg border border-white/15 font-display text-[11px] font-semibold text-slate-400">3</span>
+              <span>
+                <span class="step-label block text-sm font-medium text-slate-400">Estrutura desejada</span>
+                <span class="block text-xs text-slate-500">O que sobe no evento</span>
+              </span>
+            </a>
+          </nav>
+
+          <p class="mt-7 border-t border-white/10 pt-5 text-xs leading-relaxed text-slate-500">Em dúvida em algum campo? Deixe em branco e a gente resolve na conversa.</p>
+        </div>
+      </aside>
+
+      <form id="briefing" novalidate class="reveal space-y-6 sm:space-y-8" style="--d:100ms">
+
+        <!-- mesmo progresso, versão compacta que acompanha a rolagem no celular -->
+        <div class="sticky top-[92px] z-30 rounded-2xl border border-white/10 bg-ink-900/90 px-4 py-3 backdrop-blur-xl lg:hidden">
+          <div class="flex items-baseline justify-between">
+            <span class="text-xs font-semibold uppercase tracking-[.16em] text-slate-400">Seu briefing</span>
+            <span class="text-xs text-slate-400"><b data-prog-num class="font-display text-sm font-semibold text-white">0</b> de 7</span>
           </div>
-          <div>
-            <label for="telefone" class="mb-2 block text-sm font-medium text-slate-300">WhatsApp para retorno <span class="text-azul-400">*</span></label>
-            <input id="telefone" name="telefone" type="tel" inputmode="numeric" class="field" placeholder="(31) 99999-9999" autocomplete="tel">
-          </div>
-          <div class="sm:col-span-2">
-            <label for="email" class="mb-2 block text-sm font-medium text-slate-300">E-mail <span class="text-slate-600">(opcional)</span></label>
-            <input id="email" name="email" type="email" class="field" placeholder="seunome@email.com" autocomplete="email">
+          <div class="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
+            <div data-prog-bar class="h-full w-0 rounded-full bg-gradient-to-r from-azul-600 to-azul-400 transition-[width] duration-500 ease-out"></div>
           </div>
         </div>
-      </fieldset>
 
-      <!-- Bloco 2 -->
-      <fieldset class="rounded-3xl border border-white/8 bg-ink-800/50 p-6 backdrop-blur sm:p-9">
-        <legend class="flex items-center gap-3 px-2">
-          <span class="grid h-7 w-7 place-items-center rounded-lg bg-azul-500/15 font-display text-xs font-semibold text-azul-300">2</span>
-          <span class="font-display text-base font-semibold text-white">Sobre o evento</span>
-        </legend>
+        <!-- Bloco 1 -->
+        <fieldset id="passo1" class="panel overflow-hidden rounded-3xl border border-white/10 bg-ink-800/50 backdrop-blur-xl">
+          <legend class="sr-only">Seus dados</legend>
+          <div class="flex items-center gap-4 border-b border-white/10 bg-white/[.02] px-6 py-5 sm:px-8">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-xs font-semibold text-white shadow-lg shadow-azul-600/25">1</span>
+            <div>
+              <h3 class="font-display text-base font-semibold text-white">Seus dados</h3>
+              <p class="text-xs text-slate-400">Para onde enviamos a proposta</p>
+            </div>
+            <span data-passo="passo1" class="painel-check ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full border border-white/15" aria-hidden="true"></span>
+          </div>
 
-        <div class="mt-7">
-          <p class="mb-3 text-sm font-medium text-slate-300">Tipo de evento <span class="text-azul-400">*</span></p>
-          <div id="tipoEventoGroup" class="flex flex-wrap gap-2.5">
-            <label class="chip relative"><input type="radio" name="tipoEvento" value="Casamento"><span>Casamento</span></label>
-            <label class="chip relative"><input type="radio" name="tipoEvento" value="Festa de 15 anos"><span>Festa de 15 anos</span></label>
-            <label class="chip relative"><input type="radio" name="tipoEvento" value="Evento corporativo"><span>Evento corporativo</span></label>
-            <label class="chip relative"><input type="radio" name="tipoEvento" value="Workshop ou treinamento"><span>Workshop ou treinamento</span></label>
-            <label class="chip relative"><input type="radio" name="tipoEvento" value="Show musical"><span>Show musical</span></label>
-            <label class="chip relative"><input type="radio" name="tipoEvento" value="Formatura ou confraternização"><span>Formatura ou confraternização</span></label>
-            <label class="chip relative"><input type="radio" name="tipoEvento" value="Aniversário"><span>Aniversário</span></label>
-            <label class="chip relative"><input type="radio" name="tipoEvento" value="Outro"><span>Outro</span></label>
-          </div>
-        </div>
-
-        <div class="mt-8 grid gap-5 sm:grid-cols-2">
-          <div>
-            <label for="data" class="mb-2 block text-sm font-medium text-slate-300">Data do evento <span class="text-azul-400">*</span></label>
-            <input id="data" name="data" type="date" class="field">
-          </div>
-          <div>
-            <label for="publico" class="mb-2 block text-sm font-medium text-slate-300">Número de pessoas <span class="text-azul-400">*</span></label>
-            <select id="publico" name="publico" class="field">
-              <option value="">Selecione</option>
-              <option>Até 50 pessoas</option>
-              <option>De 50 a 150 pessoas</option>
-              <option>De 150 a 300 pessoas</option>
-              <option>De 300 a 600 pessoas</option>
-              <option>De 600 a 1.500 pessoas</option>
-              <option>Mais de 1.500 pessoas</option>
-              <option>Ainda não sei</option>
-            </select>
-          </div>
-          <div>
-            <label for="horaInicio" class="mb-2 block text-sm font-medium text-slate-300">Horário de início</label>
-            <input id="horaInicio" name="horaInicio" type="time" class="field">
-          </div>
-          <div>
-            <label for="duracao" class="mb-2 block text-sm font-medium text-slate-300">Duração prevista</label>
-            <select id="duracao" name="duracao" class="field">
-              <option value="">Selecione</option>
-              <option>Até 4 horas</option>
-              <option>De 4 a 6 horas</option>
-              <option>De 6 a 10 horas</option>
-              <option>Mais de 10 horas</option>
-              <option>Mais de um dia</option>
-            </select>
-          </div>
-          <div class="sm:col-span-2">
-            <label for="local" class="mb-2 block text-sm font-medium text-slate-300">Local do evento <span class="text-azul-400">*</span></label>
-            <input id="local" name="local" type="text" class="field" placeholder="Nome do espaço, bairro e cidade">
-          </div>
-          <div class="sm:col-span-2">
-            <p class="mb-3 text-sm font-medium text-slate-300">Ambiente</p>
-            <div class="flex flex-wrap gap-2.5">
-              <label class="chip relative"><input type="radio" name="ambiente" value="Coberto"><span>Coberto</span></label>
-              <label class="chip relative"><input type="radio" name="ambiente" value="Ao ar livre"><span>Ao ar livre</span></label>
-              <label class="chip relative"><input type="radio" name="ambiente" value="Misto"><span>Misto</span></label>
-              <label class="chip relative"><input type="radio" name="ambiente" value="Ainda não definido"><span>Ainda não definido</span></label>
+          <div class="grid gap-5 px-6 py-6 sm:grid-cols-2 sm:px-8 sm:py-8">
+            <div>
+              <label for="nome" class="mb-2 block text-sm font-medium text-slate-200">Nome completo <span class="text-azul-400">*</span></label>
+              <input id="nome" name="nome" type="text" class="field" placeholder="Como podemos te chamar" autocomplete="name">
+            </div>
+            <div>
+              <label for="telefone" class="mb-2 block text-sm font-medium text-slate-200">WhatsApp para retorno <span class="text-azul-400">*</span></label>
+              <input id="telefone" name="telefone" type="tel" inputmode="numeric" class="field" placeholder="(31) 99999-9999" autocomplete="tel">
+            </div>
+            <div class="sm:col-span-2">
+              <label for="email" class="mb-2 block text-sm font-medium text-slate-200">E-mail <span class="font-normal text-slate-500">(opcional)</span></label>
+              <input id="email" name="email" type="email" class="field" placeholder="seunome@email.com" autocomplete="email">
             </div>
           </div>
-        </div>
-      </fieldset>
+        </fieldset>
 
-      <!-- Bloco 3 -->
-      <fieldset class="rounded-3xl border border-white/8 bg-ink-800/50 p-6 backdrop-blur sm:p-9">
-        <legend class="flex items-center gap-3 px-2">
-          <span class="grid h-7 w-7 place-items-center rounded-lg bg-azul-500/15 font-display text-xs font-semibold text-azul-300">3</span>
-          <span class="font-display text-base font-semibold text-white">Estrutura desejada</span>
-        </legend>
+        <!-- Bloco 2 -->
+        <fieldset id="passo2" class="panel overflow-hidden rounded-3xl border border-white/10 bg-ink-800/50 backdrop-blur-xl">
+          <legend class="sr-only">Sobre o evento</legend>
+          <div class="flex items-center gap-4 border-b border-white/10 bg-white/[.02] px-6 py-5 sm:px-8">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-xs font-semibold text-white shadow-lg shadow-azul-600/25">2</span>
+            <div>
+              <h3 class="font-display text-base font-semibold text-white">Sobre o evento</h3>
+              <p class="text-xs text-slate-400">O que define o tamanho da montagem</p>
+            </div>
+            <span data-passo="passo2" class="painel-check ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full border border-white/15" aria-hidden="true"></span>
+          </div>
 
-        <div class="mt-7">
-          <p class="mb-3 text-sm text-slate-400">Pode marcar quantas opções quiser. Se estiver em dúvida, marque a última e a gente ajuda a definir.</p>
-          <div id="estruturaGroup" class="flex flex-wrap gap-2.5">
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Estrutura completa"><span>Estrutura completa</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Somente som"><span>Somente som</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Painéis de LED"><span>Painéis de LED</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Iluminação"><span>Iluminação</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Palco ou praticável"><span>Palco ou praticável</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Telão ou projeção"><span>Telão ou projeção</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Microfones sem fio"><span>Microfones sem fio</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Gerador ou energia"><span>Gerador ou energia</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Equipe técnica no local"><span>Equipe técnica no local</span></label>
-            <label class="chip relative"><input type="checkbox" name="estrutura" value="Preciso de orientação"><span>Preciso de orientação</span></label>
+          <div class="px-6 py-6 sm:px-8 sm:py-8">
+            <p class="mb-3 text-sm font-medium text-slate-200">Tipo de evento <span class="text-azul-400">*</span></p>
+            <div id="tipoEventoGroup" class="flex flex-wrap gap-2.5">
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Casamento"><span>Casamento</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Festa de 15 anos"><span>Festa de 15 anos</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Evento corporativo"><span>Evento corporativo</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Workshop ou treinamento"><span>Workshop ou treinamento</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Show musical"><span>Show musical</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Formatura ou confraternização"><span>Formatura ou confraternização</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Aniversário"><span>Aniversário</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Outro"><span>Outro</span></label>
+            </div>
+
+            <div class="mt-8 grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="data" class="mb-2 block text-sm font-medium text-slate-200">Data do evento <span class="text-azul-400">*</span></label>
+                <input id="data" name="data" type="date" class="field">
+              </div>
+              <div>
+                <label for="publico" class="mb-2 block text-sm font-medium text-slate-200">Número de pessoas <span class="text-azul-400">*</span></label>
+                <select id="publico" name="publico" class="field">
+                  <option value="">Selecione</option>
+                  <option>Até 50 pessoas</option>
+                  <option>De 50 a 150 pessoas</option>
+                  <option>De 150 a 300 pessoas</option>
+                  <option>De 300 a 600 pessoas</option>
+                  <option>De 600 a 1.500 pessoas</option>
+                  <option>Mais de 1.500 pessoas</option>
+                  <option>Ainda não sei</option>
+                </select>
+              </div>
+              <div>
+                <label for="horaInicio" class="mb-2 block text-sm font-medium text-slate-200">Horário de início</label>
+                <input id="horaInicio" name="horaInicio" type="time" class="field">
+              </div>
+              <div>
+                <label for="duracao" class="mb-2 block text-sm font-medium text-slate-200">Duração prevista</label>
+                <select id="duracao" name="duracao" class="field">
+                  <option value="">Selecione</option>
+                  <option>Até 4 horas</option>
+                  <option>De 4 a 6 horas</option>
+                  <option>De 6 a 10 horas</option>
+                  <option>Mais de 10 horas</option>
+                  <option>Mais de um dia</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <label for="local" class="mb-2 block text-sm font-medium text-slate-200">Local do evento <span class="text-azul-400">*</span></label>
+                <input id="local" name="local" type="text" class="field" placeholder="Nome do espaço, bairro e cidade">
+              </div>
+              <div class="sm:col-span-2">
+                <p class="mb-3 text-sm font-medium text-slate-200">Ambiente</p>
+                <div class="flex flex-wrap gap-2.5">
+                  <label class="chip relative"><input type="radio" name="ambiente" value="Coberto"><span>Coberto</span></label>
+                  <label class="chip relative"><input type="radio" name="ambiente" value="Ao ar livre"><span>Ao ar livre</span></label>
+                  <label class="chip relative"><input type="radio" name="ambiente" value="Misto"><span>Misto</span></label>
+                  <label class="chip relative"><input type="radio" name="ambiente" value="Ainda não definido"><span>Ainda não definido</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Bloco 3 -->
+        <fieldset id="passo3" class="panel overflow-hidden rounded-3xl border border-white/10 bg-ink-800/50 backdrop-blur-xl">
+          <legend class="sr-only">Estrutura desejada</legend>
+          <div class="flex items-center gap-4 border-b border-white/10 bg-white/[.02] px-6 py-5 sm:px-8">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-xs font-semibold text-white shadow-lg shadow-azul-600/25">3</span>
+            <div>
+              <h3 class="font-display text-base font-semibold text-white">Estrutura desejada</h3>
+              <p class="text-xs text-slate-400">Marque quantas opções quiser</p>
+            </div>
+            <span data-passo="passo3" class="painel-check ml-auto grid h-6 w-6 shrink-0 place-items-center rounded-full border border-white/15" aria-hidden="true"></span>
+          </div>
+
+          <div class="px-6 py-6 sm:px-8 sm:py-8">
+            <p class="mb-3 text-sm text-slate-400">Se estiver em dúvida, marque a última e a gente ajuda a definir.</p>
+            <div id="estruturaGroup" class="flex flex-wrap gap-2.5">
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Estrutura completa"><span>Estrutura completa</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Somente som"><span>Somente som</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Painéis de LED"><span>Painéis de LED</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Iluminação"><span>Iluminação</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Palco ou praticável"><span>Palco ou praticável</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Telão ou projeção"><span>Telão ou projeção</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Microfones sem fio"><span>Microfones sem fio</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Gerador ou energia"><span>Gerador ou energia</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Equipe técnica no local"><span>Equipe técnica no local</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Preciso de orientação"><span>Preciso de orientação</span></label>
+            </div>
+
+            <div class="mt-8 grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="atracoes" class="mb-2 block text-sm font-medium text-slate-200">Atrações previstas</label>
+                <select id="atracoes" name="atracoes" class="field">
+                  <option value="">Selecione</option>
+                  <option>DJ</option>
+                  <option>Banda ao vivo</option>
+                  <option>DJ e banda</option>
+                  <option>Apenas palestrante ou cerimônia</option>
+                  <option>Ainda não definido</option>
+                </select>
+              </div>
+              <div>
+                <label for="investimento" class="mb-2 block text-sm font-medium text-slate-200">Faixa de investimento <span class="font-normal text-slate-500">(opcional)</span></label>
+                <select id="investimento" name="investimento" class="field">
+                  <option value="">Prefiro não informar</option>
+                  <option>Até R$ 3.000</option>
+                  <option>De R$ 3.000 a R$ 8.000</option>
+                  <option>De R$ 8.000 a R$ 15.000</option>
+                  <option>De R$ 15.000 a R$ 30.000</option>
+                  <option>Acima de R$ 30.000</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <label for="observacoes" class="mb-2 block text-sm font-medium text-slate-200">Detalhes que ajudam</label>
+                <textarea id="observacoes" name="observacoes" rows="4" class="field resize-y" placeholder="Horário da cerimônia, se já tem outros fornecedores, necessidade de visita técnica, restrição de ruído do local, o que mais achar importante."></textarea>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Envio -->
+        <div class="relative overflow-hidden rounded-3xl border border-azul-500/25 bg-gradient-to-br from-azul-600/15 via-ink-800/60 to-ink-900/50 p-6 backdrop-blur-xl sm:p-9">
+          <div class="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-azul-500/20 blur-3xl"></div>
+
+          <div class="relative">
+            <p id="erroForm" class="mb-5 hidden items-center gap-2 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300"></p>
+
+            <button type="submit"
+              class="shine group flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-azul-600 to-azul-500 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-azul-600/30 transition duration-300 hover:shadow-2xl hover:shadow-azul-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul-300 active:scale-[.99]">
+              <svg viewBox="0 0 24 24" class="relative z-10 h-5 w-5 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
+              <span class="relative z-10">Enviar no WhatsApp</span>
+              <svg viewBox="0 0 24 24" class="relative z-10 h-4 w-4 stroke-current transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <p class="mt-4 text-center text-xs text-slate-400">O WhatsApp abre com a mensagem pronta. Nada é salvo neste site.</p>
           </div>
         </div>
-
-        <div class="mt-8 grid gap-5 sm:grid-cols-2">
-          <div>
-            <label for="atracoes" class="mb-2 block text-sm font-medium text-slate-300">Atrações previstas</label>
-            <select id="atracoes" name="atracoes" class="field">
-              <option value="">Selecione</option>
-              <option>DJ</option>
-              <option>Banda ao vivo</option>
-              <option>DJ e banda</option>
-              <option>Apenas palestrante ou cerimônia</option>
-              <option>Ainda não definido</option>
-            </select>
-          </div>
-          <div>
-            <label for="investimento" class="mb-2 block text-sm font-medium text-slate-300">Faixa de investimento <span class="text-slate-600">(opcional)</span></label>
-            <select id="investimento" name="investimento" class="field">
-              <option value="">Prefiro não informar</option>
-              <option>Até R$ 3.000</option>
-              <option>De R$ 3.000 a R$ 8.000</option>
-              <option>De R$ 8.000 a R$ 15.000</option>
-              <option>De R$ 15.000 a R$ 30.000</option>
-              <option>Acima de R$ 30.000</option>
-            </select>
-          </div>
-          <div class="sm:col-span-2">
-            <label for="observacoes" class="mb-2 block text-sm font-medium text-slate-300">Detalhes que ajudam</label>
-            <textarea id="observacoes" name="observacoes" rows="4" class="field resize-y" placeholder="Horário da cerimônia, se já tem outros fornecedores, necessidade de visita técnica, restrição de ruído do local, o que mais achar importante."></textarea>
-          </div>
-        </div>
-      </fieldset>
-
-      <!-- Envio -->
-      <div class="rounded-3xl border border-azul-500/25 bg-azul-500/[.06] p-6 sm:p-9">
-        <p id="erroForm" class="mb-5 hidden items-center gap-2 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300"></p>
-
-        <button type="submit"
-          class="group flex w-full items-center justify-center gap-3 rounded-xl bg-azul-500 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-azul-500/25 transition hover:bg-azul-400 active:scale-[.99]">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
-          Enviar no WhatsApp
-          <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform group-hover:translate-x-1" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-        <p class="mt-4 text-center text-xs text-slate-500">Ao enviar, o WhatsApp abre com a mensagem pronta. Nada é salvo neste site.</p>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </section>
 
@@ -894,6 +1147,69 @@ tailwind.config = {
     g.classList.toggle('rounded-xl', comErro);
     g.classList.toggle('p-3', comErro);
     g.classList.toggle('-m-3', comErro);
+  }
+
+
+  /* ---------- progresso do briefing ---------- */
+  /* os sete itens que a validação exige, agrupados por bloco do formulário */
+  var PASSOS = [
+    { id: 'passo1', campos: ['nome', 'telefone'], grupos: [] },
+    { id: 'passo2', campos: ['data', 'publico', 'local'], grupos: ['tipoEvento'] },
+    { id: 'passo3', campos: [], grupos: ['estrutura'] }
+  ];
+  var camposDoForm = form.querySelectorAll('.field');
+  var progNums = document.querySelectorAll('[data-prog-num]');
+  var progBars = document.querySelectorAll('[data-prog-bar]');
+
+  function temValor(id) {
+    var el = document.getElementById(id);
+    return !!(el && el.value.trim());
+  }
+  function grupoMarcado(nome) {
+    return !!form.querySelector('input[name="' + nome + '"]:checked');
+  }
+
+  function atualizarProgresso() {
+    /* barra azul à esquerda dos campos já preenchidos */
+    camposDoForm.forEach(function (el) {
+      el.classList.toggle('is-filled', !!(el.value || '').trim());
+    });
+
+    var total = 0, feitos = 0;
+    PASSOS.forEach(function (passo) {
+      var doPasso = passo.campos.length + passo.grupos.length;
+      var prontos = 0;
+      passo.campos.forEach(function (c) { if (temValor(c)) prontos++; });
+      passo.grupos.forEach(function (g) { if (grupoMarcado(g)) prontos++; });
+      total += doPasso;
+      feitos += prontos;
+      document.querySelectorAll('[data-passo="' + passo.id + '"]').forEach(function (n) {
+        n.classList.toggle('is-done', prontos === doPasso);
+      });
+    });
+
+    progNums.forEach(function (n) { n.textContent = feitos; });
+    progBars.forEach(function (b) { b.style.width = (feitos / total * 100) + '%'; });
+  }
+
+  form.addEventListener('input', atualizarProgresso);
+  form.addEventListener('change', atualizarProgresso);
+  atualizarProgresso();
+
+  /* destaca no trilho o bloco que está na tela */
+  if ('IntersectionObserver' in window) {
+    var passosNaTela = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        document.querySelectorAll('.step').forEach(function (s) {
+          s.classList.toggle('is-active', s.getAttribute('data-passo') === e.target.id);
+        });
+      });
+    }, { rootMargin: '-25% 0px -60% 0px' });
+    PASSOS.forEach(function (passo) {
+      var el = document.getElementById(passo.id);
+      if (el) passosNaTela.observe(el);
+    });
   }
 
   /* ---------- validação e envio ---------- */
