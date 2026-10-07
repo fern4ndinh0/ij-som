@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>IJ Som | Estrutura completa para eventos</title>
-<meta name="description" content="Estrutura completa para eventos: sonorização com mesa digital, painéis de LED, iluminação, palco e equipe técnica. Casamentos, 15 anos, corporativos, workshops e shows.">
+<meta name="description" content="Estrutura completa para eventos em BH e região: sonorização com equipamentos de ponta, painéis de LED, iluminação, palco e equipe técnica. Casamentos, 15 anos, corporativos, shows, festivais e aniversários.">
 <meta name="theme-color" content="#060A0F">
 <meta property="og:title" content="IJ Som | Estrutura completa para eventos">
 <meta property="og:type" content="website">
@@ -17,6 +17,8 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
+  /* hover: só vale onde existe mouse; no celular o estado ficava preso depois do toque */
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
       colors: {
@@ -33,15 +35,25 @@ tailwind.config = {
 }
 </script>
 <style>
-  :root{ color-scheme: dark; }
-  html{ -webkit-text-size-adjust:100%; }
+  :root{
+    color-scheme: dark;
+    /* curvas da casa: entradas e saídas usam ease-out forte, movimento em tela usa ease-in-out */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  html{ -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent; }
   body{ background:#060A0F; overflow-x:hidden; }
   ::selection{ background:#12A5E3; color:#04202e; }
+
+  /* toque: clique sem atraso e sem selecionar o texto de botões no long-press */
+  a, button, label{ touch-action:manipulation; }
+  button, .press, header nav a, #mobileMenu a, .chip span, .step{ -webkit-user-select:none; user-select:none; }
 
   /* âncoras não param atrás da barra fixa */
   section[id], [id="topo"]{ scroll-margin-top:90px; }
 
-  /* trilhos de luz do fundo, inspirados na arte da marca */
+  /* ---------- trilhos de luz do fundo, inspirados na arte da marca ----------
+     movimento ambiente e longo: ease-in-out nativo, mais macio que a curva forte da UI */
   .beam{
     position:absolute; top:-30%; height:170%; width:2px;
     background:linear-gradient(to bottom, transparent, rgba(60,193,245,.75), transparent);
@@ -53,15 +65,123 @@ tailwind.config = {
     0%,100%{ transform:rotate(18deg) translateX(0); opacity:.30 }
     50%    { transform:rotate(15deg) translateX(30px); opacity:.65 }
   }
+  /* versão discreta dos trilhos para as outras seções escuras */
+  .beams-soft{ position:absolute; inset:0; overflow:hidden; pointer-events:none; opacity:.4; }
+
+  /* moving heads: dois cones de luz que varrem o palco devagar, de um lado para o outro */
+  .spot{
+    position:absolute; top:-14%; width:min(52vw,620px); height:120%;
+    transform-origin:50% 0; transform:translateX(-50%) rotate(var(--from));
+    background:linear-gradient(to bottom, rgba(127,220,255,.20), rgba(18,165,227,.07) 45%, transparent 80%);
+    clip-path:polygon(47% 0, 53% 0, 100% 100%, 0 100%);
+    filter:blur(16px); mix-blend-mode:screen; pointer-events:none;
+    animation: spot 14s ease-in-out infinite alternate;
+  }
+  @keyframes spot{
+    from{ transform:translateX(-50%) rotate(var(--from)) }
+    to  { transform:translateX(-50%) rotate(var(--to)) }
+  }
 
   .grain{
     background-image:radial-gradient(rgba(255,255,255,.055) 1px, transparent 1px);
     background-size:3px 3px;
   }
 
-  /* revelação no scroll */
-  .reveal{ opacity:0; transform:translateY(26px); }
-  .reveal.is-in{ opacity:1; transform:none; transition:opacity .75s cubic-bezier(.16,1,.3,1), transform .75s cubic-bezier(.16,1,.3,1); transition-delay:var(--d,0ms); }
+  /* ---------- hero: o logo como protagonista ---------- */
+  .brand{ position:relative; width:clamp(250px, 68vw, 600px); margin-inline:auto; }
+  .brand svg{ display:block; width:100%; height:auto; overflow:visible; }
+  .brand-glow{
+    position:absolute; inset:-35% -12%; z-index:-1; pointer-events:none;
+    background:radial-gradient(50% 50% at 50% 50%, rgba(18,165,227,.34), transparent 72%);
+    filter:blur(28px); animation: glow 7s ease-in-out infinite alternate;
+  }
+  @keyframes glow{ from{ opacity:.5; transform:scale(.96) } to{ opacity:.9; transform:scale(1.04) } }
+
+  /* reflexo no "piso" do palco: mostra só o topo do logo invertido, sumindo */
+  .brand-reflex{ aspect-ratio:489/52; overflow:hidden; margin-top:.35rem; pointer-events:none; opacity:.11;
+    -webkit-mask-image:linear-gradient(to bottom, #000, transparent); mask-image:linear-gradient(to bottom, #000, transparent); }
+  .brand-reflex svg{ transform:scaleY(-1); filter:blur(2px); }
+
+  /* o feixe que atravessa as letras: passa, some, e volta alguns segundos depois */
+  /* curva easeInOutQuad: a forte deixava o feixe parado no "IJ" e correndo pelo "som" */
+  .brand-sheen{ animation: sheen 8s cubic-bezier(0.45, 0, 0.55, 1) 1.25s infinite; }
+  @keyframes sheen{ 0%{ transform:translateX(0) } 34%,100%{ transform:translateX(820px) } }
+
+  /* entrada: o logo "acende" vindo do desfoque, e o resto chega em cascata */
+  .brand-in{ animation: brand-in 1.2s var(--ease-out) .15s both; }
+  @keyframes brand-in{
+    from{ opacity:0; transform:translateY(14px) scale(.96); filter:blur(14px) }
+    to  { opacity:1; transform:none; filter:none }
+  }
+  .hero-in{ animation: hero-in .9s var(--ease-out) var(--d,0ms) both; }
+  @keyframes hero-in{
+    from{ opacity:0; transform:translateY(14px); filter:blur(6px) }
+    to  { opacity:1; transform:none; filter:none }
+  }
+  .hero-bg{ animation: fade-in 1.8s ease-out both; }
+  @keyframes fade-in{ from{ opacity:0 } to{ opacity:1 } }
+
+  /* logo da barra só aparece depois que o logo grande sai da tela */
+  .nav-logo{ transition:opacity .3s var(--ease-out), transform .3s var(--ease-out); }
+  .nav-logo.is-hidden{ opacity:0; transform:translateY(-4px); pointer-events:none; }
+
+  /* ---------- seções claras: um fio de luz percorre a borda e um brilho deriva ao fundo ---------- */
+  .hairline-sweep{
+    position:absolute; top:0; left:0; height:1px; width:30%; pointer-events:none;
+    background:linear-gradient(90deg, transparent, #3CC1F5, transparent);
+    animation: hairline 10s ease-in-out infinite;
+  }
+  @keyframes hairline{
+    0%      { transform:translateX(-100%); opacity:0 }
+    8%      { opacity:1 }
+    55%     { transform:translateX(333%); opacity:1 }
+    60%,100%{ transform:translateX(333%); opacity:0 }
+  }
+  .drift-glow{
+    position:absolute; top:-10%; left:0; width:55%; height:75%; pointer-events:none;
+    background:radial-gradient(closest-side, rgba(18,165,227,.10), transparent);
+    animation: drift 24s ease-in-out infinite alternate;
+  }
+  @keyframes drift{ from{ transform:translateX(-25%) } to{ transform:translateX(105%) } }
+
+  /* ---------- revelação no scroll ---------- */
+  .reveal{ opacity:0; transform:translateY(18px); filter:blur(4px); }
+  .reveal.is-in{ opacity:1; transform:none; filter:none;
+    transition:opacity .8s var(--ease-out), transform .8s var(--ease-out), filter .8s var(--ease-out);
+    transition-delay:var(--d,0ms); }
+  /* fotos da estrutura: a moldura abre e a imagem assenta */
+  .reveal .clip-in{ clip-path:inset(9% 7% 9% 7% round 1.5rem); }
+  .reveal .clip-in img{ scale:1.12; }
+  .reveal.is-in .clip-in{ clip-path:inset(0 round 1.5rem); transition:clip-path 1.1s var(--ease-out) var(--d,0ms); }
+  .reveal.is-in .clip-in img{ scale:1; transition:transform .7s var(--ease-out), scale 1.4s var(--ease-out) var(--d,0ms); }
+
+  /* resposta ao toque: tudo que é botão afunda um pouco ao ser pressionado */
+  html .press{ transition-property:color, background-color, border-color, box-shadow, transform, scale, opacity;
+    transition-duration:.2s; transition-timing-function:var(--ease-out); }
+  html .press:active{ scale:.97; transition-duration:.1s; }
+
+  /* menu do celular: abre do canto do botão, sai mais rápido do que entra */
+  #mobileMenu{ transform-origin:top right; opacity:0; transform:translateY(-6px) scale(.98); visibility:hidden;
+    transition:opacity .15s ease-out, transform .15s ease-out, visibility 0s .15s; }
+  #mobileMenu.is-open{ opacity:1; transform:none; visibility:visible;
+    transition:opacity .2s var(--ease-out), transform .2s var(--ease-out), visibility 0s; }
+  #burger path{ transform-origin:12px 12px; transition:transform .2s var(--ease-out), opacity .15s ease-out; }
+  #burger[aria-expanded="true"] .l1{ transform:rotate(45deg) translateY(5px); }
+  #burger[aria-expanded="true"] .l2{ opacity:0; }
+  #burger[aria-expanded="true"] .l3{ transform:rotate(-45deg) translateY(-5px); }
+
+  /* botão flutuante: sobe ao rolar, some perto do formulário */
+  .float-wpp{ transition:transform .5s var(--ease-out), opacity .3s ease-out, scale .15s var(--ease-out); }
+  .float-wpp:active{ scale:.94; }
+
+  /* ---------- clientes: esteira de logos com as pontas esmaecidas ---------- */
+  .logos{ -webkit-mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+          mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .logos-track{ display:flex; width:max-content; animation:slide 50s linear infinite; }
+  .logos-set{ display:flex; flex-shrink:0; align-items:center; }
+  .logo-item{ display:grid; place-items:center; width:200px; height:96px; }
+  .logo-item img{ opacity:.55; transition:opacity .2s ease; }
+  @media (max-width:640px){ .logo-item{ width:150px; height:80px } .logo-item img{ scale:.85 } }
 
   /* equalizador do hero */
   .eq span{ display:block; flex:1 1 0; border-radius:2px; height:100%;
@@ -75,21 +195,18 @@ tailwind.config = {
     background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%), rgba(60,193,245,.16), transparent 62%);
     opacity:0; transition:opacity .35s;
   }
-  .card-glow:hover::after{ opacity:1 }
 
   .link-underline{ background-image:linear-gradient(#3CC1F5,#3CC1F5); background-size:0% 1.5px; background-position:0 100%;
-    background-repeat:no-repeat; transition:background-size .35s cubic-bezier(.16,1,.3,1); }
-  .link-underline:hover{ background-size:100% 1.5px }
+    background-repeat:no-repeat; transition:background-size .35s var(--ease-out), color .2s ease; }
 
   /* chips do formulário */
   .chip input{ position:absolute; opacity:0; width:0; height:0 }
-  .chip span{ display:flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none;
+  .chip span{ display:flex; align-items:center; gap:.5rem; cursor:pointer;
     min-height:46px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03);
-    padding:.65rem .95rem; border-radius:.75rem; font-size:.875rem; line-height:1.3; color:#cbd5e1; transition:all .2s;
-    -webkit-tap-highlight-color:transparent; }
-  .chip:hover span{ border-color:rgba(60,193,245,.45); color:#e2e8f0 }
+    padding:.65rem .95rem; border-radius:.75rem; font-size:.875rem; line-height:1.3; color:#cbd5e1; }
   .chip input:checked + span{ border-color:#12A5E3; background:rgba(18,165,227,.14); color:#fff; box-shadow:0 0 0 1px rgba(18,165,227,.35) }
   .chip input:focus-visible + span{ outline:2px solid #3CC1F5; outline-offset:2px }
+  .chip:active span{ scale:.97 }
 
   .field{ width:100%; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.12);
     border-radius:.75rem; padding:.8rem .95rem; color:#f1f5f9; font-size:.95rem; transition:border-color .2s, box-shadow .2s; }
@@ -114,13 +231,13 @@ tailwind.config = {
     to  { transform:scale(1.24) translate3d(1.5%,-1.5%,0) }
   }
   /* as fotos abrem em leque quando o mouse passa pela pilha */
-  .ig-card{ transition:transform .7s cubic-bezier(.16,1,.3,1), box-shadow .7s; }
+  .ig-card{ transition:transform .7s var(--ease-out), box-shadow .7s; }
   @media (min-width:640px){
     .ig-card:nth-child(1){ transform:rotate(-7deg) translateY(4%) }
     .ig-card:nth-child(2){ transform:rotate(1.5deg) translateY(-5%) scale(1.06); z-index:2 }
     .ig-card:nth-child(3){ transform:rotate(7deg) translateY(4%) }
   }
-  @media (min-width:640px) and (hover:hover){
+  @media (min-width:640px) and (hover:hover) and (pointer:fine){
     .ig-stack:hover .ig-card:nth-child(1){ transform:rotate(-11deg) translate(-9%,-2%) }
     .ig-stack:hover .ig-card:nth-child(2){ transform:rotate(0deg) translateY(-10%) scale(1.1) }
     .ig-stack:hover .ig-card:nth-child(3){ transform:rotate(11deg) translate(9%,-2%) }
@@ -130,18 +247,17 @@ tailwind.config = {
   .shine::after{
     content:""; position:absolute; inset:0; z-index:1; pointer-events:none; transform:translateX(-130%);
     background:linear-gradient(100deg, transparent 25%, rgba(255,255,255,.22) 50%, transparent 75%);
-    transition:transform .85s cubic-bezier(.16,1,.3,1);
+    transition:transform .85s var(--ease-out);
   }
-  .shine:hover::after, .shine:focus-visible::after{ transform:translateX(130%) }
+  .shine:focus-visible::after{ transform:translateX(130%) }
 
   /* ---------- formulário: trilho de progresso ---------- */
   .panel{ scroll-margin-top:110px; }
   .step{ transition:background-color .25s, color .25s; }
-  .step:hover{ background:rgba(255,255,255,.04) }
   .step.is-active{ background:rgba(255,255,255,.06) }
   .step.is-active .step-label{ color:#fff }
   .step.is-active .step-dot{ border-color:rgba(60,193,245,.55); background:rgba(18,165,227,.14); color:#7FDCFF }
-  .step-dot{ transition:all .3s }
+  .step-dot{ transition:background-color .3s, border-color .3s, color .3s }
   /* concluído vem depois de .is-active: quando o passo está nos dois estados, o check vence */
   .step.is-done .step-dot,
   .painel-check.is-done{
@@ -149,11 +265,10 @@ tailwind.config = {
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4L19 7'/%3E%3C/svg%3E");
     background-size:.72rem; background-position:center; background-repeat:no-repeat;
   }
-  .painel-check{ opacity:0; transform:scale(.7); transition:opacity .35s, transform .35s cubic-bezier(.16,1,.3,1) }
+  .painel-check{ opacity:0; transform:scale(.7); transition:opacity .35s, transform .35s var(--ease-out) }
   .painel-check.is-done{ opacity:1; transform:none }
 
   /* ---------- formulário: campos e chips ---------- */
-  .field:hover:not(:focus){ border-color:rgba(255,255,255,.2) }
   /* barra azul à esquerda marca o que já está preenchido */
   .field.is-filled{ box-shadow:inset 2px 0 0 rgba(18,165,227,.75) }
   .field.is-filled:focus{ box-shadow:inset 2px 0 0 #12A5E3, 0 0 0 3px rgba(18,165,227,.18) }
@@ -174,73 +289,93 @@ tailwind.config = {
     background-size:.7rem; background-position:center; background-repeat:no-repeat;
   }
   .chip input[type=radio]:checked + span::before{ background-image:none; box-shadow:inset 0 0 0 3.5px #0A1017 }
-  .chip span{ transition:border-color .2s, background-color .2s, color .2s, box-shadow .2s, transform .2s }
-  @media (hover:hover){ .chip:hover span{ transform:translateY(-1px) } }
+  .chip span{ transition:border-color .2s, background-color .2s, color .2s, box-shadow .2s, transform .2s var(--ease-out), scale .1s var(--ease-out) }
+
+  /* ---------- hover só onde existe mouse: no toque ele fica "grudado" depois do tap ---------- */
+  @media (hover: hover) and (pointer: fine){
+    .link-underline:hover{ background-size:100% 1.5px }
+    .card-glow:hover::after{ opacity:1 }
+    .chip:hover span{ border-color:rgba(60,193,245,.45); color:#e2e8f0; transform:translateY(-1px) }
+    .shine:hover::after{ transform:translateX(130%) }
+    .step:hover{ background:rgba(255,255,255,.04) }
+    .field:hover:not(:focus){ border-color:rgba(255,255,255,.2) }
+    .float-wpp:hover{ scale:1.05 }
+    .logos:hover .logos-track{ animation-play-state:paused }
+    .logo-item:hover img{ opacity:1 }
+  }
 
   /* --------- ajustes de celular --------- */
   /* abaixo de 16px o iOS dá zoom sozinho ao focar o campo */
-  @media (max-width: 640px){
+  @media (max-width: 640px), (pointer: coarse){
     .field{ font-size:16px; padding:.85rem .95rem; }
     .field::placeholder{ font-size:.9rem }
   }
-  /* em tela de toque o hover fica "grudado" depois do tap */
-  @media (hover: none){
-    .card-glow:hover{ transform:none !important }
-    .card-glow::after{ display:none }
-    img.hover\:scale-105:hover{ transform:none }
+  @media (max-width: 640px){
+    .spot{ width:90vw; opacity:.8 }
   }
 
+  /* menos movimento: some o deslocamento, fica só o fade */
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important }
-    .reveal{ opacity:1; transform:none }
+    .reveal{ opacity:1; transform:none; filter:none }
+    .reveal .clip-in{ clip-path:none } .reveal .clip-in img{ scale:1 }
+    .brand-sheen{ display:none }
+    .logos{ -webkit-mask-image:none; mask-image:none }
+    .logos-track{ animation:none; width:auto; justify-content:center }
+    .logos-set{ flex-wrap:wrap; justify-content:center; flex-shrink:1 }
+    .logos-set[aria-hidden]{ display:none }
   }
 </style>
 </head>
 <body class="bg-ink-900 font-sans text-slate-300 antialiased">
 
 <!-- ====================== NAV ====================== -->
-<header id="nav" class="fixed inset-x-0 top-0 z-50 transition-all duration-300" style="padding-top:env(safe-area-inset-top,0px)">
+<header id="nav" class="fixed inset-x-0 top-0 z-50" style="padding-top:env(safe-area-inset-top,0px)">
   <div class="mx-auto max-w-6xl px-5 sm:px-8">
-    <div id="navbar" class="mt-4 flex items-center justify-between rounded-2xl border border-white/5 bg-ink-800/60 px-4 py-3 backdrop-blur-xl transition-all duration-300 sm:px-5">
-      <a href="#topo" class="flex shrink-0 items-center" aria-label="IJ Som, ir para o início">
-        <img src="img/logo-ij.png" alt="IJ Som" width="500" height="200"
+    <div id="navbar" class="mt-4 flex items-center justify-between rounded-2xl border border-white/5 bg-ink-800/60 px-4 py-3 backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 sm:px-5">
+      <a id="navLogo" href="#topo" class="nav-logo is-hidden flex shrink-0 items-center" aria-label="IJ Som, ir para o início">
+        <img src="img/logo-ij.svg" alt="IJ Som" width="489" height="193"
              class="h-7 w-auto drop-shadow-[0_0_12px_rgba(60,193,245,.45)] sm:h-8">
       </a>
 
-      <nav class="hidden items-center gap-7 text-sm text-slate-400 lg:flex">
-        <a href="#eventos" class="link-underline hover:text-white">Eventos</a>
-        <a href="#estrutura" class="link-underline hover:text-white">Estrutura</a>
-        <a href="#processo" class="link-underline hover:text-white">Como funciona</a>
-        <a href="#diferenciais" class="link-underline hover:text-white">Diferenciais</a>
+      <nav class="hidden items-center gap-8 text-[15px] font-medium text-slate-300 lg:flex">
+        <a href="#eventos" class="link-underline py-1 hover:text-white">Eventos</a>
+        <a href="#estrutura" class="link-underline py-1 hover:text-white">Estrutura</a>
+        <a href="#processo" class="link-underline py-1 hover:text-white">Como funciona</a>
+        <a href="#diferenciais" class="link-underline py-1 hover:text-white">Diferenciais</a>
       </nav>
 
       <div class="flex items-center gap-2">
-        <a href="#orcamento" class="hidden rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-azul-500/60 hover:text-white sm:block">Orçamento</a>
+        <a href="#orcamento" class="press hidden rounded-xl border border-white/10 px-4 py-2.5 text-[15px] font-medium text-slate-200 hover:border-azul-500/60 hover:text-white sm:block">Orçamento</a>
         <a href="https://wa.me/5531999777676?text=Ol%C3%A1%2C%20IJ%20Som!%20Vim%20pelo%20site%20e%20gostaria%20de%20falar%20sobre%20um%20evento." target="_blank" rel="noopener"
-           class="flex items-center gap-2 rounded-xl bg-azul-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-azul-500/25 transition hover:bg-azul-400">
+           class="press flex items-center gap-2 rounded-xl bg-azul-500 px-4 py-2.5 text-[15px] font-semibold text-white shadow-lg shadow-azul-500/25 hover:bg-azul-400">
           <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
           <span class="hidden sm:inline">WhatsApp</span>
         </a>
-        <button id="burger" class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-slate-300 lg:hidden" aria-label="Abrir menu" aria-expanded="false">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <button id="burger" class="press grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-slate-300 lg:hidden" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobileMenu">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path class="l1" d="M4 7h16"/><path class="l2" d="M4 12h16"/><path class="l3" d="M4 17h16"/></svg>
         </button>
       </div>
     </div>
 
-    <div id="mobileMenu" class="mt-2 hidden overflow-hidden rounded-2xl border border-white/5 bg-ink-800/95 backdrop-blur-xl lg:hidden">
-      <a href="#eventos" class="block border-b border-white/5 px-5 py-4 text-slate-300">Eventos</a>
-      <a href="#estrutura" class="block border-b border-white/5 px-5 py-4 text-slate-300">Estrutura</a>
-      <a href="#processo" class="block border-b border-white/5 px-5 py-4 text-slate-300">Como funciona</a>
-      <a href="#diferenciais" class="block border-b border-white/5 px-5 py-4 text-slate-300">Diferenciais</a>
-      <a href="#orcamento" class="block px-5 py-4 font-semibold text-azul-400">Pedir orçamento</a>
+    <div id="mobileMenu" class="mt-2 overflow-hidden rounded-2xl border border-white/5 bg-ink-800/95 text-[17px] backdrop-blur-xl lg:hidden">
+      <a href="#eventos" class="block border-b border-white/5 px-5 py-4 text-slate-200 active:bg-white/5">Eventos</a>
+      <a href="#estrutura" class="block border-b border-white/5 px-5 py-4 text-slate-200 active:bg-white/5">Estrutura</a>
+      <a href="#processo" class="block border-b border-white/5 px-5 py-4 text-slate-200 active:bg-white/5">Como funciona</a>
+      <a href="#diferenciais" class="block border-b border-white/5 px-5 py-4 text-slate-200 active:bg-white/5">Diferenciais</a>
+      <a href="#orcamento" class="block px-5 py-4 font-semibold text-azul-400 active:bg-white/5">Pedir orçamento</a>
     </div>
   </div>
 </header>
 
-<!-- ====================== HERO ====================== -->
-<section id="topo" class="relative isolate overflow-hidden pb-14 pt-28 sm:pb-24 sm:pt-44">
-  <div class="absolute inset-0 -z-10">
+<!-- ====================== HERO ======================
+     O logo é o protagonista: acende vindo do desfoque, um feixe de luz atravessa as letras
+     de tempos em tempos e os cones de luz varrem o fundo como moving heads num palco. -->
+<section id="topo" class="relative isolate flex min-h-[100svh] flex-col overflow-hidden pt-28 sm:pt-32">
+  <div class="hero-bg absolute inset-0 -z-10" aria-hidden="true">
     <div class="absolute inset-0 bg-[radial-gradient(90%_60%_at_50%_0%,#0E2233_0%,#060A0F_62%)]"></div>
+    <div class="spot" style="left:22%; --from:-20deg; --to:16deg"></div>
+    <div class="spot" style="left:78%; --from:18deg; --to:-14deg; animation-delay:-7s"></div>
     <div class="beam wide" style="left:8%;  animation-delay:-1s"></div>
     <div class="beam" style="left:22%; animation-delay:-3s"></div>
     <div class="beam wide" style="left:46%; animation-delay:-5s"></div>
@@ -250,53 +385,85 @@ tailwind.config = {
     <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink-900 to-transparent"></div>
   </div>
 
-  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-5 text-center sm:px-8">
 
-    <h1 class="reveal mt-7 max-w-4xl font-display text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl lg:text-7xl" style="--d:80ms">
-      A estrutura que faz<br class="hidden sm:block"> o seu evento
-      <span class="relative whitespace-nowrap">
-        <span class="relative z-10 bg-gradient-to-r from-azul-300 via-azul-400 to-azul-600 bg-clip-text text-transparent">acontecer.</span>
-        <svg viewBox="0 0 300 12" class="absolute -bottom-2 left-0 w-full text-azul-500/60" fill="none" aria-hidden="true">
-          <path d="M2 8c60-6 130-7 296-3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-        </svg>
+    <p class="hero-in inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[.04] px-4 py-1.5 text-[11px] font-medium uppercase tracking-[.22em] text-slate-300 backdrop-blur sm:text-xs" style="--d:700ms">
+      <span class="h-1.5 w-1.5 rounded-full bg-azul-400 shadow-[0_0_10px_2px_rgba(60,193,245,.7)]"></span>
+      Estrutura completa para eventos
+    </p>
+
+    <h1 class="brand brand-in mt-8 sm:mt-10">
+      <span class="brand-glow" aria-hidden="true"></span>
+      <svg viewBox="6 4 489 193" role="img" aria-label="IJ Som">
+        <defs>
+          <path id="ijPath" fill-rule="evenodd" d="M55.75 193.75C54.99 193.65 53.76 193.44 53 193.29C52.24 193.14 50.95 192.91 50.12 192.78C49.3 192.65 47.84 192.3 46.88 192.01C45.91 191.71 44.62 191.35 44 191.22C43.38 191.08 42.37 190.81 41.75 190.63C41.13 190.44 40.18 190.21 39.64 190.12C38.55 189.94 37.3 189.36 35.83 188.35C35.3 188 33.98 187.25 32.88 186.7C30.7 185.6 26.98 183.27 26.04 182.41C25.71 182.12 25.07 181.3 24.6 180.6C24.14 179.9 23.22 178.97 22.57 178.52C20.9 177.38 19.33 175.21 17.23 171.12C16.24 169.2 15.11 167.15 14.72 166.58C14.32 166.01 14 165.39 13.99 165.2C13.99 165.02 13.77 164.43 13.5 163.88C13.23 163.32 13.01 162.58 13.01 162.22C13 161.86 12.84 161.1 12.64 160.54C12.44 159.97 12.2 158.81 12.1 157.95C12 157.08 11.72 155.93 11.47 155.38C11.22 154.83 11 153.98 11 153.5C10.99 153.02 10.8 151.95 10.59 151.12C10.25 149.84 10.18 146.78 10.07 129.94L9.94 110.26L10.61 110C11.49 109.67 42.97 109.66 43.5 109.99C43.83 110.2 43.89 112.69 44 129.05L44.12 147.88L45.84 151.25C47.41 154.35 48.52 156 49.05 156C49.16 156 49.89 156.37 50.65 156.81C53.39 158.4 54.14 158.8 55.5 159.33L56.88 159.88L89 159.88L121.12 159.88L122.62 159.33C123.45 159.03 124.52 158.47 125 158.08C125.48 157.69 126.33 157.08 126.88 156.73C127.42 156.37 128.29 155.81 128.81 155.48C129.45 155.06 129.93 154.44 130.37 153.47C130.72 152.7 131 151.99 131 151.91C131 151.83 131.35 151.05 131.77 150.19C133.32 147.06 133.23 151.26 133.24 76.33L133.25 7.78L133.81 7.39C134.3 7.05 136.6 7 153.63 7C169.88 7 172.98 7.06 173.39 7.35C173.87 7.7 173.88 8.68 173.94 71.42C173.98 111.1 173.91 137.01 173.76 140.12C173.48 145.78 173.11 149.71 172.73 151C172.59 151.48 172.31 152.83 172.11 154C171.16 159.54 171.06 159.9 169.65 162.86C168.87 164.51 167.96 166.21 167.62 166.65C167.29 167.09 166.84 167.94 166.62 168.54C166.4 169.13 166.05 170.1 165.84 170.67C165.63 171.25 165.02 172.15 164.47 172.67C163.92 173.2 162.65 174.64 161.64 175.88C160.63 177.11 158.24 179.61 156.32 181.41C153.48 184.1 152.55 184.83 151.25 185.38C150.37 185.75 149.19 186.42 148.64 186.87C147.38 187.89 143.34 189.93 141.64 190.4C140.94 190.6 139.71 190.87 138.9 191.01C138.1 191.16 137.14 191.41 136.78 191.59C136.07 191.93 132.75 192.71 129 193.42C126.79 193.84 124.23 193.88 91.88 193.9C72.76 193.92 56.51 193.85 55.75 193.75ZM223.12 136.99C220.55 136.87 219.08 136.69 218.45 136.41C217.93 136.18 217.26 136 216.94 136C216.41 136 214.15 135.24 211 134C210.24 133.71 209.29 133.34 208.88 133.2C208.46 133.05 207.96 132.79 207.75 132.62C207.54 132.45 206.53 132.05 205.5 131.74C202.51 130.85 202.18 130.7 201.06 129.66C199.9 128.59 199.71 127.78 200.4 126.79C200.62 126.48 201.11 125.12 201.48 123.77C201.88 122.35 202.49 120.84 202.95 120.16C203.38 119.53 204.09 118.19 204.52 117.19C204.96 116.19 205.69 114.79 206.15 114.07C206.61 113.35 207.06 112.45 207.15 112.07C207.38 111.06 207.95 110.25 208.42 110.25C209.02 110.25 212.1 111.82 212.94 112.55C213.92 113.42 214.91 113.74 222 115.53C222.62 115.68 223.63 115.96 224.25 116.14C226.22 116.72 230.5 117.25 233.15 117.25C237.99 117.25 242.62 115.66 244.33 113.41C245.21 112.25 245.64 110.2 245.23 109.18C244.83 108.21 242.44 105.18 241.68 104.69C240.12 103.68 236.01 102.07 234.62 101.92C233.66 101.82 232.5 101.45 231.38 100.88C230.41 100.4 229.43 100.01 229.19 100C228.74 100 227.49 99.47 224.75 98.11C223.86 97.67 222.11 97 220.88 96.61C218.17 95.77 214.88 93.89 213 92.11C212.24 91.4 211.12 90.5 210.5 90.12C209.2 89.3 208.62 88.63 207.72 86.84C207.35 86.13 206.7 85.1 206.26 84.56C205.82 84 205.07 82.43 204.55 80.97L203.62 78.38L203.64 73.75L203.65 69.12L204.55 66.72C205.57 64.01 205.94 63.24 206.97 61.7C207.36 61.11 207.82 60.2 207.99 59.68C208.5 58.09 213.93 53.04 217 51.3C218.53 50.42 219.48 50.02 222.94 48.74C223.73 48.45 224.88 48 225.5 47.74C227.97 46.7 232.23 45.85 236.85 45.47C242.4 45.01 249.8 45.71 254.62 47.14C255.72 47.47 257.24 47.91 258 48.12C258.76 48.33 260.33 48.83 261.5 49.24C262.67 49.64 263.95 49.98 264.35 49.99C264.75 49.99 265.65 50.38 266.35 50.85C267.05 51.31 268.02 51.87 268.5 52.08C268.98 52.29 269.65 52.69 269.99 52.96L270.61 53.46L270.05 54.54C269.73 55.14 269.38 55.79 269.25 56C269.05 56.33 268.37 57.82 267.38 60.12C267.2 60.54 266.97 61.16 266.87 61.5C266.77 61.84 266.6 62.24 266.49 62.38C266.38 62.51 266.21 63.18 266.11 63.86C266.01 64.55 265.54 65.76 265.03 66.61C264.54 67.44 263.95 68.46 263.73 68.88C263.16 69.91 262.34 69.95 260.84 69.01C259.69 68.27 255.49 66.76 254.56 66.74C254.32 66.74 253.91 66.57 253.64 66.37C253.37 66.17 252.94 66 252.69 66C252.43 66 251.69 65.79 251.05 65.53C248.31 64.44 245.51 64 241.3 64C237.86 64 237.08 64.07 236 64.5C235.3 64.78 234.53 65 234.28 65C234.03 65 233.09 65.56 232.18 66.24C230.19 67.75 229.1 69.64 229.32 71.24C229.47 72.4 231.35 75.15 232.7 76.19C234.23 77.36 237.75 78.93 239.88 79.38C240.97 79.61 242.26 79.96 242.72 80.16C243.19 80.36 244.56 80.85 245.76 81.25C246.97 81.65 248.55 82.26 249.29 82.6C251 83.38 254.61 84.73 255.79 85.02C257.55 85.45 259.82 86.84 261.49 88.51C262.12 89.14 263.18 89.93 263.85 90.27C264.53 90.6 265.42 91.3 265.83 91.81C267.07 93.35 267.49 92.95 267.5 90.23C267.5 88.29 268.17 83.57 268.61 82.38C268.81 81.83 268.98 81.12 268.99 80.8C269 80.48 269.17 79.91 269.37 79.51C269.57 79.12 269.84 78.37 269.98 77.84C270.43 76.03 271.19 74.11 271.93 72.87C272.34 72.18 272.87 70.89 273.12 70C273.37 69.11 273.87 67.98 274.24 67.5C274.6 67.02 275.3 66.01 275.8 65.25C276.29 64.49 277.19 63.23 277.79 62.44C278.38 61.66 279.16 60.62 279.5 60.14C280.45 58.81 283.8 55.84 286.61 53.84C287.99 52.85 289.67 51.63 290.33 51.13C291.03 50.6 292.14 50.06 292.96 49.85C293.74 49.65 295.22 49.08 296.25 48.58C298.83 47.35 302.57 46.11 306 45.34C308.56 44.77 309.46 44.7 314.25 44.68C319.76 44.65 322.21 44.95 326 46.13C326.62 46.33 327.91 46.73 328.88 47.02C329.84 47.32 331.24 47.88 332 48.28C332.76 48.67 334.27 49.28 335.38 49.64C336.48 49.99 337.6 50.48 337.88 50.73C338.15 50.97 339.33 51.79 340.5 52.55C341.67 53.3 343.13 54.33 343.75 54.84C347.13 57.59 348.59 58.97 349 59.75C349.25 60.23 350 61.15 350.67 61.78C351.33 62.42 352.32 63.58 352.88 64.36C353.43 65.14 354.19 66.18 354.57 66.68C354.95 67.17 355.45 68.15 355.69 68.85C355.93 69.55 356.66 71.22 357.3 72.56C358.44 74.9 358.96 75.43 359.41 74.69C359.52 74.52 359.58 68.21 359.54 60.67C359.47 48.46 359.51 46.9 359.86 46.36L360.26 45.75L372.49 45.75C382 45.75 384.77 45.82 384.92 46.06C385.03 46.23 385.18 47.61 385.25 49.12C385.37 51.73 385.4 51.88 385.93 51.95C386.27 52 386.86 51.73 387.43 51.28C388.5 50.42 392.21 48.46 395.75 46.89C402.27 44 410.03 43.54 416.5 45.68C417.94 46.15 419.63 46.84 420.25 47.2C420.87 47.56 422.5 48.41 423.88 49.09C425.29 49.78 426.75 50.7 427.25 51.22C428.61 52.63 431.32 55 431.58 55C431.7 55 432.43 54.43 433.19 53.73C435.27 51.83 439.36 49.25 440.28 49.25C440.42 49.25 441.79 48.64 443.33 47.9C444.87 47.15 446.8 46.35 447.62 46.11C448.45 45.88 449.63 45.53 450.25 45.34C450.87 45.16 451.94 44.94 452.62 44.87C453.31 44.8 454.87 44.61 456.08 44.45C458.33 44.17 462.3 44.41 465.5 45.04C467.87 45.51 472.06 47 473.75 47.98C475.49 48.99 477.29 49.85 478.17 50.11C478.47 50.2 480.11 51.66 481.83 53.36C484.6 56.11 485.02 56.64 485.63 58.17C486 59.11 486.62 60.34 487 60.91C487.67 61.9 488.57 63.85 489.23 65.75C489.4 66.23 489.83 67.47 490.19 68.5L490.83 70.38L490.93 102.88C491.01 129.73 490.97 135.45 490.69 135.83C490.38 136.25 489.59 136.28 477.93 136.34C471.09 136.37 465.37 136.33 465.22 136.23C465.07 136.14 464.85 135.57 464.73 134.97C464.62 134.37 464.52 122.34 464.51 108.25C464.49 81.03 464.42 78.92 463.29 75.62C461.59 70.63 460.18 69.04 456.12 67.52C453.58 66.57 448.44 67 445.75 68.38C444.81 68.86 440.44 73.24 439.8 74.34C439.49 74.87 439.01 76.44 438.74 77.84C438.27 80.27 438.25 81.54 438.25 107.89C438.25 129.68 438.18 135.49 437.93 135.84C437.64 136.23 436.62 136.28 425.5 136.38C416.09 136.46 413.24 136.42 412.75 136.17L412.12 135.86L412 107.74L411.88 79.62L411.28 77.25C410.75 75.12 410.4 74.29 408.97 71.73C407.74 69.52 406.43 68.49 403.63 67.52C400.81 66.54 395.94 67 393 68.53C391.92 69.09 388.32 72.95 387.55 74.38C386.96 75.46 386.36 77.05 385.94 78.62C385.77 79.29 385.64 88.89 385.57 107.43C385.48 133.11 385.44 135.27 385.04 135.76C384.63 136.27 384.47 136.28 372.57 136.33C363.91 136.36 360.45 136.3 360.24 136.09C359.62 135.47 359.51 133.34 359.51 121.11C359.5 110.95 359.43 108.25 359.17 107.9C358.85 107.46 358.82 107.46 358.39 107.9C357.94 108.35 356.87 110.54 356 112.81C355.3 114.65 353.09 117.94 351.27 119.88C350.36 120.84 349.43 122.03 349.2 122.5C348.69 123.56 346.94 125.29 345.76 125.88C345.29 126.12 344.33 126.85 343.64 127.5C342.01 129.02 339.81 130.49 337.7 131.47C336.78 131.9 335.95 132.25 335.87 132.25C335.79 132.25 334.46 132.86 332.92 133.6C331.38 134.34 329.28 135.19 328.25 135.5C327.22 135.81 325.98 136.24 325.5 136.45C323.31 137.41 304.11 137.38 302.73 136.42C302.41 136.19 301.91 136 301.63 135.99C301.35 135.99 300.68 135.77 300.12 135.5C299.57 135.23 298.9 135.01 298.62 135.01C298.35 135 297.62 134.73 297 134.4C296.38 134.08 294.43 133.16 292.66 132.36C289.23 130.82 286.96 129.44 284.77 127.54C284.03 126.9 283.21 126.26 282.95 126.11C281.97 125.56 279.24 122.64 278.74 121.61C278.46 121.02 277.79 120.14 277.26 119.66C276.13 118.64 274.63 116.49 273.53 114.31C273.1 113.45 272.59 112.75 272.4 112.75C271.98 112.75 271.13 114.3 270.89 115.51C270.59 116.95 269.84 118.83 269.03 120.14C268.61 120.82 268.1 121.71 267.89 122.12C266.64 124.58 265.68 125.86 263.88 127.5C262.77 128.5 261.46 129.75 260.95 130.28C260.44 130.81 259.88 131.25 259.7 131.25C259.14 131.25 256.71 132.34 254.26 133.69C252.95 134.41 251.65 135 251.38 135C251.11 135 250.32 135.21 249.63 135.47C246.27 136.73 245.9 136.8 241.12 137.01C235.68 137.26 228.56 137.25 223.12 136.99ZM73.2 136.01L72.62 135.54L72.62 92.56C72.62 56.5 72.68 49.51 72.97 49.16C73.28 48.79 74.95 48.75 92.5 48.75C110.04 48.75 111.72 48.79 112.03 49.16C112.32 49.51 112.38 56.51 112.38 92.68C112.38 135.09 112.37 135.8 111.89 136.15C111.48 136.45 108.47 136.5 92.59 136.49C74.6 136.48 73.75 136.46 73.2 136.01ZM316.5 116.13C317.81 115.92 320.17 115.32 321.75 114.78L324.62 113.8L326.62 111.55C327.73 110.31 329.02 108.96 329.51 108.54C330 108.13 330.69 107.19 331.04 106.45C331.99 104.48 333.37 99.53 334.03 95.75C334.42 93.46 334.2 86.03 333.68 84.25C333.46 83.49 333.04 81.97 332.76 80.88C331.61 76.47 330.66 74.55 328.83 72.97C328.3 72.51 327.14 71.38 326.25 70.46C323.98 68.1 321.74 67.09 317.9 66.69C314.52 66.33 313.88 66.33 310.34 66.69C306.24 67.11 304.94 67.79 301.22 71.48C299.62 73.07 297.95 74.98 297.51 75.72C296.49 77.47 295.75 79.42 295.75 80.4C295.75 80.82 295.58 81.72 295.37 82.4C294.67 84.69 294 89.08 294 91.4C294 92.88 294.23 94.81 294.63 96.79C296.42 105.59 296.7 106.26 299.97 109.53C301.02 110.57 302.29 111.94 302.8 112.55C303.52 113.44 304.06 113.8 305.3 114.23C306.17 114.53 307.21 114.89 307.62 115.04C309.01 115.54 310.92 116.01 312.4 116.22C313.21 116.34 313.93 116.45 314 116.47C314.07 116.48 315.19 116.33 316.5 116.13ZM72.31 40.79C72.06 40.64 72.01 37.18 72.06 24.37L72.12 8.14L72.97 7.57L73.82 7L92.66 7C111.17 7 111.51 7.01 112 7.5C112.49 7.99 112.5 8.33 112.5 24.2C112.5 36.47 112.43 40.47 112.2 40.7C111.97 40.93 107.21 41 92.26 41C81.46 40.99 72.48 40.9 72.31 40.79Z"/>
+          <clipPath id="ijClip"><use href="#ijPath"/></clipPath>
+          <linearGradient id="ijFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FFFFFF"/>
+            <stop offset="1" stop-color="#C9E2F0"/>
+          </linearGradient>
+          <linearGradient id="ijSheenGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0"   stop-color="#3CC1F5" stop-opacity="0"/>
+            <stop offset=".38" stop-color="#3CC1F5" stop-opacity=".9"/>
+            <stop offset=".5"  stop-color="#FFFFFF"/>
+            <stop offset=".62" stop-color="#3CC1F5" stop-opacity=".9"/>
+            <stop offset="1"   stop-color="#3CC1F5" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g id="ijArt">
+          <use href="#ijPath" fill="url(#ijFill)"/>
+          <g clip-path="url(#ijClip)">
+            <g transform="skewX(-18)">
+              <rect class="brand-sheen" x="-220" y="-20" width="170" height="250" fill="url(#ijSheenGrad)"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+      <span class="brand-reflex block" aria-hidden="true">
+        <svg viewBox="6 4 489 193"><use href="#ijArt"/></svg>
       </span>
     </h1>
 
-    <p class="reveal mt-8 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg" style="--d:160ms">
-      Sonorização com mesa digital, painéis de LED, iluminação e palco montados por uma equipe que fica ao seu lado do primeiro teste até o último acorde. Casamentos, 15 anos, eventos corporativos, workshops e shows.
+    <p class="hero-in mt-6 max-w-3xl font-display text-[1.65rem] font-semibold leading-[1.15] tracking-tight text-white sm:mt-8 sm:text-4xl lg:text-5xl" style="--d:850ms">
+      A estrutura que faz o seu evento
+      <span class="whitespace-nowrap bg-gradient-to-r from-azul-300 via-azul-400 to-azul-600 bg-clip-text text-transparent">acontecer.</span>
     </p>
 
-    <div class="reveal mt-10 flex flex-col gap-3 sm:flex-row sm:items-center" style="--d:240ms">
-      <a href="#orcamento" class="group inline-flex items-center justify-center gap-2 rounded-xl bg-azul-500 px-7 py-4 font-semibold text-white shadow-xl shadow-azul-500/25 transition hover:bg-azul-400">
+    <p class="hero-in mt-5 max-w-2xl text-base leading-relaxed text-slate-400 sm:text-lg" style="--d:950ms">
+      Som, painéis de LED, iluminação e palco com equipamentos de ponta e uma equipe que fica ao seu lado do primeiro teste até o último acorde. Casamentos, 15 anos, corporativos, shows, festivais e aniversários.
+    </p>
+
+    <div class="hero-in mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center" style="--d:1050ms">
+      <a href="#orcamento" class="press group inline-flex items-center justify-center gap-2 rounded-xl bg-azul-500 px-7 py-4 font-semibold text-white shadow-xl shadow-azul-500/25 hover:bg-azul-400">
         Montar meu orçamento
-        <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform group-hover:translate-x-1" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
       <a href="https://wa.me/5531999777676?text=Ol%C3%A1%2C%20IJ%20Som!%20Vim%20pelo%20site%20e%20gostaria%20de%20falar%20sobre%20um%20evento." target="_blank" rel="noopener"
-         class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-7 py-4 font-medium text-slate-200 backdrop-blur transition hover:border-azul-500/50 hover:text-white">
+         class="press inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.03] px-7 py-4 font-medium text-slate-200 backdrop-blur hover:border-azul-500/50 hover:text-white">
         Falar agora no WhatsApp
       </a>
     </div>
 
     <!-- Selos qualitativos. Troque por números reais (eventos realizados, anos de estrada) quando tiver os dados. -->
-    <div class="reveal mt-12 grid grid-cols-2 sm:mt-16 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4" style="--d:320ms">
-      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Mesa digital</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Console de linha, com cena salva para cada evento</p></div>
-      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Equipe própria</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Operadores de som, luz e vídeo presentes no local</p></div>
-      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Montagem inclusa</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Chegada com antecedência e tudo testado antes da hora</p></div>
+    <div class="hero-in mt-12 grid w-full grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-left sm:mt-16 lg:grid-cols-4" style="--d:1150ms">
+      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Equipamentos de ponta</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Yamaha, Shure, Sunrise e outras marcas de referência em cada montagem</p></div>
+      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Equipe própria</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Operadores de som e luz presentes no local do início ao fim</p></div>
+      <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">Atenção aos detalhes</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Tudo conferido e testado antes de sair, para nada surpreender no dia</p></div>
       <div class="bg-ink-800/80 p-5"><p class="font-display text-sm font-semibold text-white">BH e região</p><p class="mt-1.5 text-xs leading-relaxed text-slate-500">Atendimento em Belo Horizonte e interior de Minas</p></div>
     </div>
   </div>
 
-  <div id="eq" class="eq pointer-events-none mx-auto mt-16 flex h-16 max-w-6xl items-end gap-[3px] px-5 opacity-50 sm:px-8" aria-hidden="true"></div>
+  <div id="eq" class="eq pointer-events-none mx-auto mt-14 flex h-14 w-full max-w-6xl items-end gap-[3px] px-5 opacity-50 sm:mt-16 sm:h-16 sm:px-8" aria-hidden="true"></div>
 </section>
 
 <!-- ====================== MARQUEE ====================== -->
 <div class="relative overflow-hidden border-y border-white/5 bg-ink-800/40 py-4">
-  <div class="marquee-track flex w-max gap-10 whitespace-nowrap text-sm font-medium uppercase tracking-[.2em] text-slate-600">
-    <span class="flex gap-10">
-      <span>Sonorização</span><span class="text-azul-500">/</span><span>Painéis de LED</span><span class="text-azul-500">/</span><span>Iluminação cênica</span><span class="text-azul-500">/</span><span>Palco e estrutura</span><span class="text-azul-500">/</span><span>Transmissão</span><span class="text-azul-500">/</span><span>Equipe técnica</span><span class="text-azul-500">/</span>
+  <div class="marquee-track flex w-max whitespace-nowrap text-sm font-medium uppercase tracking-[.2em] text-slate-600">
+    <span class="flex shrink-0 gap-10 pr-10">
+      <span>Sonorização</span><span class="text-azul-500">/</span><span>Painéis de LED</span><span class="text-azul-500">/</span><span>Iluminação</span><span class="text-azul-500">/</span><span>Palco e estrutura</span><span class="text-azul-500">/</span><span>Equipamentos de ponta</span><span class="text-azul-500">/</span><span>Equipe técnica</span><span class="text-azul-500">/</span>
     </span>
-    <span class="flex gap-10" aria-hidden="true">
-      <span>Sonorização</span><span class="text-azul-500">/</span><span>Painéis de LED</span><span class="text-azul-500">/</span><span>Iluminação cênica</span><span class="text-azul-500">/</span><span>Palco e estrutura</span><span class="text-azul-500">/</span><span>Transmissão</span><span class="text-azul-500">/</span><span>Equipe técnica</span><span class="text-azul-500">/</span>
+    <span class="flex shrink-0 gap-10 pr-10" aria-hidden="true">
+      <span>Sonorização</span><span class="text-azul-500">/</span><span>Painéis de LED</span><span class="text-azul-500">/</span><span>Iluminação</span><span class="text-azul-500">/</span><span>Palco e estrutura</span><span class="text-azul-500">/</span><span>Equipamentos de ponta</span><span class="text-azul-500">/</span><span>Equipe técnica</span><span class="text-azul-500">/</span>
     </span>
   </div>
 </div>
@@ -308,61 +475,64 @@ tailwind.config = {
   <div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink-900/20 to-transparent"></div>
   <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-900/20 to-transparent"></div>
   <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-azul-500/60 to-transparent"></div>
+  <!-- a mesma luz do hero, aqui bem mais contida: um fio que corre a borda e um brilho que deriva -->
+  <div class="hairline-sweep" aria-hidden="true"></div>
+  <div class="drift-glow" aria-hidden="true"></div>
 
   <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
     <div class="reveal max-w-2xl">
       <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-700">O que a gente atende</p>
       <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-ink-900 sm:text-5xl">Cada evento pede uma montagem diferente</h2>
-      <p class="mt-5 text-slate-700">Um casamento de 200 pessoas em salão fechado não precisa do mesmo PA de um show ao ar livre. A gente dimensiona a estrutura pelo seu evento, não por um pacote pronto de prateleira.</p>
+      <p class="mt-5 text-slate-700">Um casamento de 200 pessoas em salão fechado não precisa do mesmo equipamento de um show ao ar livre. A gente dimensiona a estrutura pelo seu evento, não por um pacote pronto de prateleira.</p>
     </div>
 
     <div class="mt-10 grid gap-4 sm:mt-14 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
       <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7">
         <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M12 21s-7-4.5-7-9.5A3.5 3.5 0 0 1 12 9a3.5 3.5 0 0 1 7 2.5C19 16.5 12 21 12 21Z"/></svg>
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M12 21s-7-4.5-7-9.5A3.5 3.5 0 0 1 12 9a3.5 3.5 0 0 1 7 2.5C19 16.5 12 21 12 21Z"/></svg>
         </div>
         <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Casamento</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-700">Cerimônia, recepção e pista com sonorização separada por ambiente. Microfone sem fio para celebrante e votos, iluminação da mesa e do bolo, painel de LED para o retrospectivo.</p>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Cerimônia, recepção e pista com sonorização separada por ambiente. Luz que muda o clima do salão a cada momento da noite e painel de LED para o retrospectivo.</p>
       </article>
 
-      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:80ms">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:60ms">
         <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="m12 3 2.4 5.5L20 9.3l-4 4 1 5.7-5-2.8-5 2.8 1-5.7-4-4 5.6-.8Z"/></svg>
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6" aria-hidden="true"><path d="m12 3 2.4 5.5L20 9.3l-4 4 1 5.7-5-2.8-5 2.8 1-5.7-4-4 5.6-.8Z"/></svg>
         </div>
         <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Festa de 15 anos</h3>
         <p class="mt-3 text-sm leading-relaxed text-slate-700">Entrada, valsa e balada no mesmo lugar, com trocas de cena bem marcadas. Luz que acompanha a coreografia, LED para os vídeos e som pesado o suficiente para a pista.</p>
       </article>
 
-      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:160ms">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:120ms">
         <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M3 21V9l9-6 9 6v12M9 21v-6h6v6"/></svg>
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M3 4h18v12H3zM8 20h8M12 16v4M7 8h6M7 11h10"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Evento corporativo</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-700">Convenção, lançamento, premiação ou confraternização. Painel de LED no palco, microfones para mesa e plateia, operação discreta e cronograma seguido à risca.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Corporativo, workshop e treinamento</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Convenções, lançamentos, palestras e treinamentos com o painel de LED como protagonista: slides, vídeos e a marca da sua empresa nítidos até o fundo da sala. Som limpo para quem apresenta e operação discreta, no ritmo do cronograma.</p>
       </article>
 
       <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:40ms">
         <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M4 5h16v11H4zM8 21h8M12 16v5"/></svg>
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm11-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Workshop e treinamento</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-700">Inteligibilidade em primeiro lugar. Headset para quem apresenta, projeção ou LED com slides legíveis do fundo da sala e captação limpa quando o conteúdo vai ser gravado.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Show</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">PA dimensionado para o público, monitoração de palco, backline organizado e passagem de som no horário combinado com a banda. Rider técnico recebido e atendido com antecedência.</p>
       </article>
 
-      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:120ms">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:100ms">
         <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm11-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M3 9a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v1.5a2 2 0 0 0 0 3V15a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-1.5a2 2 0 0 0 0-3ZM14 7v10"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Show e festival</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-700">PA dimensionado para o público, monitoração de palco, backline organizado e passagem de som no horário combinado com a banda. Rider recebido com antecedência.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Festival</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Vários artistas no mesmo palco e horas seguidas de operação. Estrutura de palco e box truss pensada para o ar livre, troca rápida entre atrações e som e luz que aguentam o dia inteiro.</p>
       </article>
 
-      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:200ms">
+      <article class="reveal group rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)] sm:p-7" style="--d:160ms">
         <div class="grid h-11 w-11 place-items-center rounded-xl bg-azul-600/10 text-azul-700 ring-1 ring-inset ring-azul-600/20 transition duration-300 group-hover:bg-azul-600 group-hover:text-white group-hover:ring-azul-600">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6"><path d="M12 3 3 8l9 5 9-5zM5 11v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>
+          <svg viewBox="0 0 24 24" class="h-5 w-5 stroke-current" fill="none" stroke-width="1.6" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5zM5 11v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>
         </div>
-        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Formatura e confraternização</h3>
-        <p class="mt-3 text-sm leading-relaxed text-slate-700">Colação, jantar e festa com equipes e equipamentos que aguentam a noite inteira. Nomes na tela, trilha sincronizada e transição entre os blocos sem silêncio constrangedor.</p>
+        <h3 class="mt-5 font-display text-xl font-semibold text-ink-900">Formatura, confraternização e aniversários</h3>
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">Colação, festa de fim de ano ou aniversário, com equipe e equipamento que aguentam a noite inteira. Nomes na tela, trilha sincronizada e transição entre os blocos sem silêncio constrangedor.</p>
       </article>
     </div>
   </div>
@@ -372,6 +542,11 @@ tailwind.config = {
 <section id="estrutura" class="relative overflow-hidden border-y border-white/5 bg-ink-800/30 py-16 sm:py-28">
   <div class="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-azul-600/10 blur-3xl"></div>
   <div class="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-steel-700/20 blur-3xl"></div>
+  <div class="beams-soft" aria-hidden="true">
+    <div class="beam wide" style="left:12%; animation-delay:-4s"></div>
+    <div class="beam" style="left:58%; animation-delay:-1s"></div>
+    <div class="beam wide" style="left:88%; animation-delay:-7s"></div>
+  </div>
 
   <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
     <div class="reveal flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -379,7 +554,7 @@ tailwind.config = {
         <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Estrutura e equipamento</p>
         <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Tudo que sobe no evento sai da nossa casa</h2>
       </div>
-      <p class="max-w-md text-slate-400">Equipamento próprio, revisado antes de cada saída. Você fecha com uma empresa só e não precisa coordenar cinco fornecedores no dia.</p>
+      <p class="max-w-md text-slate-400">Equipamento próprio, conferido e testado antes de cada saída. Você fecha com uma empresa só e não precisa coordenar cinco fornecedores no dia.</p>
     </div>
 
     <div class="mt-12 space-y-14 sm:mt-16 sm:space-y-24">
@@ -388,12 +563,12 @@ tailwind.config = {
       <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
         <figure class="reveal group relative lg:col-span-5 lg:col-start-1 lg:row-start-1">
           <div class="pointer-events-none absolute -bottom-4 -left-4 h-28 w-28 rounded-bl-3xl border-b border-l border-azul-500/45 sm:-bottom-6 sm:-left-6 sm:h-36 sm:w-36"></div>
-          <div class="relative overflow-hidden rounded-3xl border border-white/10">
-            <img src="img/mesa.jpg" alt="Técnico da IJ Som operando a mesa digital durante o evento"
+          <div class="clip-in relative overflow-hidden rounded-3xl border border-white/10">
+            <img src="img/mesa.jpg" alt="Técnico da IJ Som operando a mesa de iluminação durante o evento"
                  loading="lazy" decoding="async"
                  class="aspect-[4/5] w-full object-cover object-center transition duration-700 group-hover:scale-105 lg:aspect-square">
             <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900/80 via-ink-900/10 to-transparent"></div>
-            <figcaption class="absolute inset-x-5 bottom-5 font-display text-sm font-medium text-white/90">Mesa digital com cena salva para o seu evento</figcaption>
+            <figcaption class="absolute inset-x-5 bottom-5 font-display text-sm font-medium text-white/90">Mesa de luz programada para cada momento do evento</figcaption>
           </div>
         </figure>
 
@@ -405,15 +580,15 @@ tailwind.config = {
                 <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
               </div>
               <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Sonorização</h3>
-              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Mesa digital com cena salva por evento, line array ou caixas ativas conforme o público, microfones sem fio, headset e lapela, retornos e monitoração in ear.</p>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Mesas digitais e microfones de marcas como Yamaha e Shure, line array ou caixas ativas conforme o público, microfones sem fio, headset e lapela, retornos e monitoração in ear.</p>
             </div>
             <div>
               <div class="flex items-center gap-3">
                 <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">02</span>
                 <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
               </div>
-              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Painéis de LED e vídeo</h3>
-              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Painéis de alta resolução em vários formatos, processamento de imagem ao vivo, exibição de vídeos e marcas, telão para cerimônia e transmissão.</p>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Iluminação</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Moving heads, par LED e efeitos, com desenho de luz pensado para cada momento da festa, além da ambientação de mesas e da arquitetura do espaço.</p>
             </div>
           </div>
         </div>
@@ -423,7 +598,7 @@ tailwind.config = {
       <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
         <figure class="reveal group relative lg:col-span-5 lg:col-start-8 lg:row-start-1">
           <div class="pointer-events-none absolute -bottom-4 -right-4 h-28 w-28 rounded-br-3xl border-b border-r border-azul-500/45 sm:-bottom-6 sm:-right-6 sm:h-36 sm:w-36"></div>
-          <div class="relative overflow-hidden rounded-3xl border border-white/10">
+          <div class="clip-in relative overflow-hidden rounded-3xl border border-white/10">
             <img src="img/palco.jpg" alt="Palco montado com painel de LED, moving heads e caixas de retorno"
                  loading="lazy" decoding="async"
                  class="aspect-[4/5] w-full object-cover object-center transition duration-700 group-hover:scale-105 lg:aspect-square">
@@ -439,8 +614,8 @@ tailwind.config = {
                 <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">03</span>
                 <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
               </div>
-              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Iluminação cênica</h3>
-              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Moving heads, par LED e efeitos, com desenho de luz pensado para cada momento da festa, além da ambientação de mesas e da arquitetura do espaço.</p>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Painéis de LED</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Painéis de alta resolução em vários formatos e tamanhos, para cenário de palco e exibição de vídeos, apresentações e marcas. Telão também disponível como opção.</p>
             </div>
             <div>
               <div class="flex items-center gap-3">
@@ -458,7 +633,7 @@ tailwind.config = {
       <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
         <figure class="reveal group relative lg:col-span-5 lg:col-start-1 lg:row-start-1">
           <div class="pointer-events-none absolute -bottom-4 -left-4 h-28 w-28 rounded-bl-3xl border-b border-l border-azul-500/45 sm:-bottom-6 sm:-left-6 sm:h-36 sm:w-36"></div>
-          <div class="relative overflow-hidden rounded-3xl border border-white/10">
+          <div class="clip-in relative overflow-hidden rounded-3xl border border-white/10">
             <img src="img/festival.jpg" alt="Equipe instalando microfone headset em apresentadora de evento cultural"
                  loading="lazy" decoding="async"
                  class="aspect-[4/5] w-full object-cover object-center transition duration-700 group-hover:scale-105 lg:aspect-square">
@@ -474,16 +649,16 @@ tailwind.config = {
                 <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">05</span>
                 <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
               </div>
-              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Energia e infraestrutura</h3>
-              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Distribuição e quadros de energia, cabeamento passado e protegido, conferência de carga antes da montagem e gerador quando o local pede.</p>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Equipe técnica</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Operadores de som e luz, montagem e desmontagem completas e técnico de plantão do início ao fim do evento.</p>
             </div>
             <div>
               <div class="flex items-center gap-3">
                 <span class="font-display text-xs font-semibold tracking-[.25em] text-azul-500">06</span>
                 <span class="h-px flex-1 bg-gradient-to-r from-azul-500/35 to-transparent"></span>
               </div>
-              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Equipe técnica</h3>
-              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Operadores de som, luz e vídeo, montagem e desmontagem completas e técnico de plantão do início ao fim do evento.</p>
+              <h3 class="mt-3.5 font-display text-xl font-semibold text-white sm:text-2xl">Conferência prévia</h3>
+              <p class="mt-2.5 text-sm leading-relaxed text-slate-400">Cada equipamento é ligado e testado na nossa base antes de ser carregado, e de novo no local antes de abrir as portas. Detalhe resolvido antes, para nada surpreender durante o evento.</p>
             </div>
           </div>
         </div>
@@ -500,6 +675,8 @@ tailwind.config = {
   <div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink-900/20 to-transparent"></div>
   <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-900/20 to-transparent"></div>
   <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-azul-500/60 to-transparent"></div>
+  <div class="hairline-sweep" style="animation-delay:-5s" aria-hidden="true"></div>
+  <div class="drift-glow" style="animation-delay:-12s" aria-hidden="true"></div>
 
   <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
     <div class="reveal max-w-2xl">
@@ -528,20 +705,20 @@ tailwind.config = {
         <li class="reveal group relative rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)]" style="--d:200ms">
           <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-sm font-semibold text-white shadow-lg shadow-azul-600/25">03</span>
           <h3 class="mt-5 font-display text-lg font-semibold text-ink-900">Visita e planejamento</h3>
-          <p class="mt-3 text-sm leading-relaxed text-slate-700">Quando o local pede, vamos até ele conferir energia, acesso, pé direito e posicionamento. Alinhamos o cronograma com você e com os outros fornecedores.</p>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">Quando o local pede, vamos até ele conferir acesso, pontos de energia, pé direito e posicionamento. Alinhamos o cronograma com você e com os outros fornecedores.</p>
         </li>
 
         <li class="reveal group relative rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,.04),0_18px_35px_-24px_rgba(15,23,42,.35)] transition duration-300 hover:-translate-y-1 hover:border-azul-400 hover:shadow-[0_1px_2px_rgba(15,23,42,.05),0_26px_45px_-22px_rgba(12,74,110,.45)]" style="--d:300ms">
           <span class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-steel-700 to-azul-600 font-display text-sm font-semibold text-white shadow-lg shadow-azul-600/25">04</span>
           <h3 class="mt-5 font-display text-lg font-semibold text-ink-900">Montagem e operação</h3>
-          <p class="mt-3 text-sm leading-relaxed text-slate-700">Chegamos cedo, testamos tudo antes de abrir as portas e ficamos com a equipe no local do começo ao fim. A desmontagem também é nossa.</p>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">Equipamento conferido antes de sair da base, chegada cedo e tudo testado de novo antes de abrir as portas. A equipe fica no local do começo ao fim, e a desmontagem também é nossa.</p>
         </li>
       </ol>
     </div>
 
     <div class="reveal mt-10 flex flex-col items-start gap-4 border-t border-slate-200 pt-8 sm:flex-row sm:items-center sm:justify-between" style="--d:400ms">
       <p class="text-sm text-slate-700">Ficou com dúvida em alguma etapa? A gente explica antes de você fechar qualquer coisa.</p>
-      <a href="#orcamento" class="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-ink-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-steel-700">
+      <a href="#orcamento" class="press group inline-flex shrink-0 items-center gap-2 rounded-xl bg-ink-900 px-5 py-3 text-sm font-semibold text-white hover:bg-steel-700">
         Começar pelo passo 01
         <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform group-hover:translate-x-1" fill="none" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
@@ -551,13 +728,17 @@ tailwind.config = {
 
 <!-- ====================== DIFERENCIAIS ====================== -->
 <section id="diferenciais" class="relative overflow-hidden border-y border-white/5 bg-ink-800/30 py-16 sm:py-28">
-  <div class="mx-auto max-w-6xl px-5 sm:px-8">
+  <div class="beams-soft" aria-hidden="true">
+    <div class="beam wide" style="left:30%; animation-delay:-3s"></div>
+    <div class="beam" style="left:72%; animation-delay:-6s"></div>
+  </div>
+  <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
     <div class="grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-center">
       <div class="reveal">
         <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Por que a IJ Som</p>
         <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">O evento é único. A operação não pode ser improviso.</h2>
         <p class="mt-6 leading-relaxed text-slate-400">Festa boa é aquela em que ninguém percebe o técnico trabalhando. Para chegar nesse ponto tem equipamento revisado, gente experiente na mesa e um plano para quando algo sai do previsto.</p>
-        <a href="#orcamento" class="group mt-9 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 font-semibold text-ink-900 transition hover:bg-azul-300">
+        <a href="#orcamento" class="press group mt-9 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 font-semibold text-ink-900 hover:bg-azul-300">
           Quero um orçamento
           <svg viewBox="0 0 24 24" class="h-4 w-4 stroke-current transition-transform group-hover:translate-x-1" fill="none" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
@@ -566,7 +747,7 @@ tailwind.config = {
       <ul class="reveal divide-y divide-white/10 border-y border-white/10">
         <li class="flex gap-4 py-5">
           <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
-          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Equipamento de linha.</strong> Consoles digitais, caixas e painéis de marcas reconhecidas, com manutenção em dia e conferência antes de cada carregamento.</p>
+          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Equipamentos de ponta.</strong> Yamaha, Shure, Sunrise e outras marcas de referência, com manutenção em dia. A gente usa o que há de melhor porque o seu evento não tem ensaio.</p>
         </li>
         <li class="flex gap-4 py-5">
           <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
@@ -574,7 +755,7 @@ tailwind.config = {
         </li>
         <li class="flex gap-4 py-5">
           <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
-          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Passagem de som de verdade.</strong> Nada de ajustar volume com o salão cheio. A montagem termina antes, com tempo para testar cada microfone e cada entrada.</p>
+          <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Conferência antes de tudo.</strong> Cada item é testado na base antes de carregar e de novo no local. Nada de ajustar volume com o salão cheio: a montagem termina antes, com tempo para passar cada microfone e cada entrada.</p>
         </li>
         <li class="flex gap-4 py-5">
           <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
@@ -588,6 +769,57 @@ tailwind.config = {
           <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 stroke-azul-400" fill="none" stroke-width="1.8" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
           <p class="text-sm leading-relaxed text-slate-400"><strong class="font-semibold text-white">Conversa com os fornecedores.</strong> Alinhamos cronograma com cerimonial, buffet, fotógrafo e banda para que ninguém atropele ninguém no dia.</p>
         </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== CLIENTES ======================
+     Logos tratados em branco para conviverem na mesma faixa (originais coloridos ficam em img/).
+     A lista aparece duas vezes para a esteira fechar o ciclo sem emenda. -->
+<section id="clientes" class="relative overflow-hidden bg-ink-900 pb-8 pt-16 sm:pb-12 sm:pt-24">
+  <div class="beams-soft" aria-hidden="true">
+    <div class="beam wide" style="left:18%; animation-delay:-5s"></div>
+    <div class="beam" style="left:80%; animation-delay:-2s"></div>
+  </div>
+
+  <div class="relative mx-auto max-w-6xl px-5 sm:px-8">
+    <div class="reveal flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold uppercase tracking-[.2em] text-azul-400">Quem confia na IJ Som</p>
+        <h2 class="mt-4 font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">Empresas e espaços que já subiram ao palco com a gente</h2>
+      </div>
+      <p class="max-w-md text-slate-400">Da indústria à educação, de convenções a casamentos no interior. Clientes que voltam porque o evento deu certo.</p>
+    </div>
+  </div>
+
+  <div class="logos reveal relative mt-12 sm:mt-16" style="--d:120ms">
+    <div class="logos-track">
+      <ul class="logos-set" aria-label="Clientes atendidos">
+        <li class="logo-item"><img src="img/clientes/anglogold.png" alt="AngloGold Ashanti" width="131" height="40" loading="lazy" decoding="async" style="width:131px;height:40px"></li>
+        <li class="logo-item"><img src="img/clientes/arcelormittal.png" alt="ArcelorMittal" width="112" height="46" loading="lazy" decoding="async" style="width:112px;height:46px"></li>
+        <li class="logo-item"><img src="img/clientes/fiemg.png" alt="Sistema FIEMG" width="97" height="54" loading="lazy" decoding="async" style="width:97px;height:54px"></li>
+        <li class="logo-item"><img src="img/clientes/ibram.png" alt="Instituto Brasileiro de Museus" width="114" height="46" loading="lazy" decoding="async" style="width:114px;height:46px"></li>
+        <li class="logo-item"><img src="img/clientes/emive.png" alt="Emive Segurança Eletrônica" width="98" height="53" loading="lazy" decoding="async" style="width:98px;height:53px"></li>
+        <li class="logo-item"><img src="img/clientes/macbras.png" alt="Macbras Tecnologia e Inovação" width="94" height="55" loading="lazy" decoding="async" style="width:94px;height:55px"></li>
+        <li class="logo-item"><img src="img/clientes/faculdade-sabara.png" alt="Faculdade de Sabará" width="70" height="64" loading="lazy" decoding="async" style="width:70px;height:64px"></li>
+        <li class="logo-item"><img src="img/clientes/colegio-augustus.png" alt="Colégio Augustus" width="124" height="42" loading="lazy" decoding="async" style="width:124px;height:42px"></li>
+        <li class="logo-item"><img src="img/clientes/asprodejas.png" alt="Asprodejas" width="144" height="36" loading="lazy" decoding="async" style="width:144px;height:36px"></li>
+        <li class="logo-item"><img src="img/clientes/fazenda-arraial-velho.png" alt="Fazenda Arraial Velho" width="62" height="64" loading="lazy" decoding="async" style="width:62px;height:64px"></li>
+        <li class="logo-item"><img src="img/clientes/villa-capao.png" alt="Villa Capão" width="55" height="64" loading="lazy" decoding="async" style="width:55px;height:64px"></li>
+      </ul>
+      <ul class="logos-set" aria-hidden="true">
+        <li class="logo-item"><img src="img/clientes/anglogold.png" alt="" width="131" height="40" loading="lazy" decoding="async" style="width:131px;height:40px"></li>
+        <li class="logo-item"><img src="img/clientes/arcelormittal.png" alt="" width="112" height="46" loading="lazy" decoding="async" style="width:112px;height:46px"></li>
+        <li class="logo-item"><img src="img/clientes/fiemg.png" alt="" width="97" height="54" loading="lazy" decoding="async" style="width:97px;height:54px"></li>
+        <li class="logo-item"><img src="img/clientes/ibram.png" alt="" width="114" height="46" loading="lazy" decoding="async" style="width:114px;height:46px"></li>
+        <li class="logo-item"><img src="img/clientes/emive.png" alt="" width="98" height="53" loading="lazy" decoding="async" style="width:98px;height:53px"></li>
+        <li class="logo-item"><img src="img/clientes/macbras.png" alt="" width="94" height="55" loading="lazy" decoding="async" style="width:94px;height:55px"></li>
+        <li class="logo-item"><img src="img/clientes/faculdade-sabara.png" alt="" width="70" height="64" loading="lazy" decoding="async" style="width:70px;height:64px"></li>
+        <li class="logo-item"><img src="img/clientes/colegio-augustus.png" alt="" width="124" height="42" loading="lazy" decoding="async" style="width:124px;height:42px"></li>
+        <li class="logo-item"><img src="img/clientes/asprodejas.png" alt="" width="144" height="36" loading="lazy" decoding="async" style="width:144px;height:36px"></li>
+        <li class="logo-item"><img src="img/clientes/fazenda-arraial-velho.png" alt="" width="62" height="64" loading="lazy" decoding="async" style="width:62px;height:64px"></li>
+        <li class="logo-item"><img src="img/clientes/villa-capao.png" alt="" width="55" height="64" loading="lazy" decoding="async" style="width:55px;height:64px"></li>
       </ul>
     </div>
   </div>
@@ -642,12 +874,12 @@ tailwind.config = {
          aria-label="Abrir o Instagram @ijsomeventos"
          class="reveal ig-stack group flex items-center justify-center gap-2.5 rounded-3xl sm:gap-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-azul-400" style="--d:140ms">
         <figure class="ig-card relative w-1/3 shrink-0 overflow-hidden sm:w-[35%] rounded-2xl border border-white/15 shadow-2xl shadow-black/60 sm:rounded-3xl">
-          <img src="img/mesa.jpg" alt="Técnico operando a mesa digital em evento" loading="lazy" decoding="async"
+          <img src="img/mesa.jpg" alt="Técnico operando a mesa de iluminação em evento" loading="lazy" decoding="async"
                class="aspect-square w-full object-cover object-center">
           <div class="absolute inset-0 bg-gradient-to-t from-ink-900/50 to-transparent"></div>
         </figure>
         <figure class="ig-card relative w-1/3 shrink-0 overflow-hidden sm:-ml-[5%] sm:w-[38%] rounded-2xl border border-white/20 shadow-2xl shadow-black/70 sm:rounded-3xl">
-          <img src="img/palco.jpg" alt="Palco com painel de LED e iluminação cênica montados" loading="lazy" decoding="async"
+          <img src="img/palco.jpg" alt="Palco com painel de LED e iluminação montados" loading="lazy" decoding="async"
                class="aspect-square w-full object-cover object-center">
           <div class="absolute inset-0 bg-gradient-to-t from-ink-900/45 to-transparent"></div>
         </figure>
@@ -664,8 +896,12 @@ tailwind.config = {
 
 <!-- ====================== FORMULÁRIO ====================== -->
 
-<section id="orcamento" class="relative border-t border-white/5 py-16 sm:py-28">
+<section id="orcamento" class="relative isolate border-t border-white/5 py-16 sm:py-28">
   <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(80%_50%_at_50%_100%,#0E2233_0%,#060A0F_60%)]"></div>
+  <div class="beams-soft -z-10" aria-hidden="true">
+    <div class="beam wide" style="left:10%; animation-delay:-2s"></div>
+    <div class="beam wide" style="left:90%; animation-delay:-6s"></div>
+  </div>
 
   <div class="mx-auto max-w-6xl px-5 sm:px-8">
     <div class="reveal mx-auto max-w-2xl text-center">
@@ -774,9 +1010,9 @@ tailwind.config = {
             <div id="tipoEventoGroup" class="flex flex-wrap gap-2.5">
               <label class="chip relative"><input type="radio" name="tipoEvento" value="Casamento"><span>Casamento</span></label>
               <label class="chip relative"><input type="radio" name="tipoEvento" value="Festa de 15 anos"><span>Festa de 15 anos</span></label>
-              <label class="chip relative"><input type="radio" name="tipoEvento" value="Evento corporativo"><span>Evento corporativo</span></label>
-              <label class="chip relative"><input type="radio" name="tipoEvento" value="Workshop ou treinamento"><span>Workshop ou treinamento</span></label>
-              <label class="chip relative"><input type="radio" name="tipoEvento" value="Show musical"><span>Show musical</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Corporativo, workshop ou treinamento"><span>Corporativo, workshop ou treinamento</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Show"><span>Show</span></label>
+              <label class="chip relative"><input type="radio" name="tipoEvento" value="Festival"><span>Festival</span></label>
               <label class="chip relative"><input type="radio" name="tipoEvento" value="Formatura ou confraternização"><span>Formatura ou confraternização</span></label>
               <label class="chip relative"><input type="radio" name="tipoEvento" value="Aniversário"><span>Aniversário</span></label>
               <label class="chip relative"><input type="radio" name="tipoEvento" value="Outro"><span>Outro</span></label>
@@ -852,9 +1088,8 @@ tailwind.config = {
               <label class="chip relative"><input type="checkbox" name="estrutura" value="Painéis de LED"><span>Painéis de LED</span></label>
               <label class="chip relative"><input type="checkbox" name="estrutura" value="Iluminação"><span>Iluminação</span></label>
               <label class="chip relative"><input type="checkbox" name="estrutura" value="Palco ou praticável"><span>Palco ou praticável</span></label>
-              <label class="chip relative"><input type="checkbox" name="estrutura" value="Telão ou projeção"><span>Telão ou projeção</span></label>
+              <label class="chip relative"><input type="checkbox" name="estrutura" value="Telão"><span>Telão</span></label>
               <label class="chip relative"><input type="checkbox" name="estrutura" value="Microfones sem fio"><span>Microfones sem fio</span></label>
-              <label class="chip relative"><input type="checkbox" name="estrutura" value="Gerador ou energia"><span>Gerador ou energia</span></label>
               <label class="chip relative"><input type="checkbox" name="estrutura" value="Equipe técnica no local"><span>Equipe técnica no local</span></label>
               <label class="chip relative"><input type="checkbox" name="estrutura" value="Preciso de orientação"><span>Preciso de orientação</span></label>
             </div>
@@ -898,7 +1133,7 @@ tailwind.config = {
             <p id="erroForm" class="mb-5 hidden items-center gap-2 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300"></p>
 
             <button type="submit"
-              class="shine group flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-azul-600 to-azul-500 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-azul-600/30 transition duration-300 hover:shadow-2xl hover:shadow-azul-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul-300 active:scale-[.99]">
+              class="shine group flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-azul-600 to-azul-500 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-azul-600/30 press hover:shadow-2xl hover:shadow-azul-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul-300">
               <svg viewBox="0 0 24 24" class="relative z-10 h-5 w-5 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
               <span class="relative z-10">Enviar no WhatsApp</span>
               <svg viewBox="0 0 24 24" class="relative z-10 h-4 w-4 stroke-current transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -912,45 +1147,34 @@ tailwind.config = {
 </section>
 
 <!-- ====================== RODAPÉ ====================== -->
-<footer class="border-t border-white/5 bg-ink-800/40">
-  <div class="mx-auto max-w-6xl px-5 py-16 sm:px-8">
-    <div class="grid gap-10 md:grid-cols-[1.3fr_1fr_1fr]">
-      <div>
-        <img src="img/logo-ij.png" alt="IJ Som" width="500" height="200" class="h-10 w-auto">
-        <p class="mt-5 max-w-sm text-sm leading-relaxed text-slate-400">Som, painéis de LED, iluminação e estrutura para eventos em Belo Horizonte e região. Equipamento próprio e equipe técnica do briefing à desmontagem.</p>
-      </div>
-
-      <div>
-        <h3 class="font-display text-sm font-semibold uppercase tracking-widest text-slate-500">Navegação</h3>
-        <ul class="mt-5 space-y-3 text-sm text-slate-400">
-          <li><a href="#eventos" class="hover:text-azul-300">Eventos</a></li>
-          <li><a href="#estrutura" class="hover:text-azul-300">Estrutura</a></li>
-          <li><a href="#processo" class="hover:text-azul-300">Como funciona</a></li>
-          <li><a href="#diferenciais" class="hover:text-azul-300">Diferenciais</a></li>
-          <li><a href="#orcamento" class="hover:text-azul-300">Orçamento</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="font-display text-sm font-semibold uppercase tracking-widest text-slate-500">Contato</h3>
-        <ul class="mt-5 space-y-3 text-sm text-slate-400">
-          <li><a href="https://wa.me/5531999777676" target="_blank" rel="noopener" class="hover:text-azul-300">(31) 99977-7676</a></li>
-          <li><a href="https://www.instagram.com/ijsomeventos?stkn=YmVwYm1jb2ZreTBt" target="_blank" rel="noopener" class="hover:text-azul-300">@ijsomeventos</a></li>
-          <li>Belo Horizonte, Minas Gerais</li>
-        </ul>
+<footer id="rodape" class="border-t border-white/5 bg-ink-800/40" style="padding-bottom:env(safe-area-inset-bottom,0px)">
+  <div class="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12">
+    <div class="flex items-center justify-between gap-6">
+      <a href="#topo" class="press shrink-0" aria-label="IJ Som, voltar ao início">
+        <img src="img/logo-ij.svg" alt="IJ Som" width="489" height="193" class="h-9 w-auto sm:h-10">
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="https://www.instagram.com/ijsomeventos?stkn=YmVwYm1jb2ZreTBt" target="_blank" rel="noopener" aria-label="Instagram da IJ Som (@ijsomeventos)"
+           class="press grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[.03] text-slate-300 hover:border-azul-500/60 hover:text-white">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2 0 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-1.8-.2-2.2-.4a3.8 3.8 0 0 1-1.4-.9 3.8 3.8 0 0 1-.9-1.4c-.2-.4-.4-1-.4-2.2-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c0-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4 1.3-.1 1.7-.1 4.9-.1m0 3.3a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13m0 10.7a4.2 4.2 0 1 1 0-8.4 4.2 4.2 0 0 1 0 8.4m6.8-10.9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg>
+        </a>
+        <a href="https://wa.me/5531999777676" target="_blank" rel="noopener" aria-label="WhatsApp da IJ Som: (31) 99977-7676"
+           class="press grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/[.03] text-slate-300 hover:border-azul-500/60 hover:text-white">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
+        </a>
       </div>
     </div>
 
-    <div class="mt-14 flex flex-col gap-3 border-t border-white/5 pt-7 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mt-8 flex flex-col gap-2 border-t border-white/5 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
       <p>&copy; <span id="ano"></span> IJ Som. Todos os direitos reservados.</p>
-      <p>Estrutura completa para eventos corporativos e sociais.</p>
+      <p>Desenvolvido por <a href="https://techdias.com" target="_blank" rel="noopener" class="link-underline font-medium text-slate-300 hover:text-white">Fernando Dias</a></p>
     </div>
   </div>
 </footer>
 
 <!-- Botão flutuante -->
 <a id="floatWpp" href="https://wa.me/5531999777676?text=Ol%C3%A1%2C%20IJ%20Som!%20Vim%20pelo%20site%20e%20gostaria%20de%20falar%20sobre%20um%20evento." target="_blank" rel="noopener"
-   class="fixed bottom-6 right-5 z-40 grid h-14 w-14 translate-y-24 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-black/40 transition-all duration-500 hover:scale-105"
+   class="float-wpp fixed bottom-6 right-5 z-40 grid h-14 w-14 translate-y-24 place-items-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-black/40"
    style="bottom:calc(1.5rem + env(safe-area-inset-bottom,0px))" aria-label="Falar no WhatsApp">
   <svg viewBox="0 0 24 24" class="h-7 w-7 fill-current" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1s-.8 1-.9 1.2c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.5-.4M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2m0 18.2c-1.6 0-3.2-.4-4.5-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2"/></svg>
 </a>
@@ -981,6 +1205,34 @@ tailwind.config = {
   }
   montarEq();
 
+  /* ---------- esteiras (serviços e clientes) ----------
+     a animação desliza metade da faixa; se uma metade for mais estreita que a tela, sobra um vão.
+     Repete o conteúdo até cada metade cobrir a tela e recalcula a duração para manter a velocidade. */
+  var PX_POR_SEG = 44;
+  function encherEsteira(trilho) {
+    var metades = trilho.children;
+    if (metades.length !== 2) return;
+    if (!trilho._base) trilho._base = Array.prototype.slice.call(metades[0].children);
+    var voltas = 0;
+    while (metades[0].getBoundingClientRect().width < window.innerWidth && voltas++ < 12) {
+      trilho._base.forEach(function (item) {
+        [metades[0], metades[1]].forEach(function (metade) {
+          var copia = item.cloneNode(true);
+          copia.setAttribute('aria-hidden', 'true');
+          copia.querySelectorAll('img').forEach(function (img) { img.alt = ''; });
+          metade.appendChild(copia);
+        });
+      });
+    }
+    trilho.style.animationDuration = (metades[0].getBoundingClientRect().width / PX_POR_SEG).toFixed(1) + 's';
+  }
+  function encherEsteiras() {
+    if (reduz) return;
+    document.querySelectorAll('.marquee-track, .logos-track').forEach(encherEsteira);
+  }
+  encherEsteiras();
+  window.addEventListener('load', encherEsteiras);
+
   /* ---------- nav ---------- */
   var navbar = document.getElementById('navbar');
   var floatWpp = document.getElementById('floatWpp');
@@ -997,46 +1249,73 @@ tailwind.config = {
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  /* o logo da barra só entra quando o logo grande do hero sai de cena, para não repetir a marca */
+  var navLogo = document.getElementById('navLogo');
+  var brand = document.querySelector('#topo .brand');
+  if (navLogo && brand && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (e) {
+      navLogo.classList.toggle('is-hidden', e[0].isIntersecting);
+    }, { rootMargin: '-80px 0px 0px 0px' }).observe(brand);
+  }
+
+  /* menu do celular */
+  function abrirMenu(abrir) {
+    menu.classList.toggle('is-open', abrir);
+    burger.setAttribute('aria-expanded', String(abrir));
+    burger.setAttribute('aria-label', abrir ? 'Fechar menu' : 'Abrir menu');
+  }
+
   /* redimensionamento: refaz o equalizador e fecha o menu ao virar a tela */
   var t;
   window.addEventListener('resize', function () {
     clearTimeout(t);
     t = setTimeout(function () {
       montarEq();
-      if (window.innerWidth >= 1024) {
-        menu.classList.add('hidden');
-        burger.setAttribute('aria-expanded', 'false');
-      }
+      encherEsteiras();
+      if (window.innerWidth >= 1024) abrirMenu(false);
     }, 180);
   });
 
   /* o botão flutuante some quando o formulário está na tela, para não cobrir o envio */
-  var secOrcamento = document.getElementById('orcamento');
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (e) {
-      floatWpp.classList.toggle('opacity-0', e[0].isIntersecting);
-      floatWpp.classList.toggle('pointer-events-none', e[0].isIntersecting);
-    }, { threshold: 0.12 }).observe(secOrcamento);
+    var cobrindo = {};
+    var obsFloat = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (e) { cobrindo[e.target.id] = e.isIntersecting; });
+      var esconder = cobrindo.orcamento || cobrindo.rodape;
+      floatWpp.classList.toggle('opacity-0', esconder);
+      floatWpp.classList.toggle('pointer-events-none', esconder);
+    }, { threshold: 0.12 });
+    obsFloat.observe(document.getElementById('orcamento'));
+    obsFloat.observe(document.getElementById('rodape'));
   }
 
   burger.addEventListener('click', function () {
-    var aberto = !menu.classList.contains('hidden');
-    menu.classList.toggle('hidden', aberto);
-    burger.setAttribute('aria-expanded', String(!aberto));
+    abrirMenu(!menu.classList.contains('is-open'));
   });
   menu.addEventListener('click', function (e) {
-    if (e.target.tagName === 'A') {
-      menu.classList.add('hidden');
-      burger.setAttribute('aria-expanded', 'false');
-    }
+    if (e.target.tagName === 'A') abrirMenu(false);
+  });
+  /* toque fora ou Esc fecham o menu */
+  document.addEventListener('click', function (e) {
+    if (menu.classList.contains('is-open') && !menu.contains(e.target) && !burger.contains(e.target)) abrirMenu(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && menu.classList.contains('is-open')) { abrirMenu(false); burger.focus(); }
   });
 
   /* ---------- revelação no scroll ---------- */
+  /* terminada a entrada, a classe sai: assim o hover dos cards volta a usar a transição curta dele
+     em vez de herdar a duração e o atraso da revelação */
+  function revelar(el) {
+    el.classList.add('is-in');
+    var atraso = parseInt(getComputedStyle(el).getPropertyValue('--d'), 10) || 0;
+    setTimeout(function () { el.classList.remove('reveal', 'is-in'); }, 1500 + atraso);
+  }
   var alvos = document.querySelectorAll('.reveal');
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entradas) {
       entradas.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+        if (e.isIntersecting) { revelar(e.target); io.unobserve(e.target); }
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
     alvos.forEach(function (el) { io.observe(el); });
